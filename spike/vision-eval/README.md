@@ -68,6 +68,25 @@ npm run eval -- --force
 npm run report      # regenerate reports from cached results
 ```
 
+## The photo set in `photos/`
+
+`photos/SOURCES.md` records where every photo came from — Commons file, author, licence —
+and what each one shows. Two things to know before trusting a run:
+
+- **It is thin on real home mandirs.** Commons has very few. Most of what the searches
+  return is temples, carvings, processions and buildings, and all of that was discarded.
+  Four photos are genuine home shrines. That is enough for a first go/no-go — can the model
+  identify deities and objects at all, does it refuse photos with no mandir in them — and
+  not enough to fix the launch label catalog (P0-06) or the acceptance thresholds (P0-08).
+- **These photos are not ours.** They are freely licensed and attributed, which is what
+  makes them usable here, but they are still other people's photographs going to a
+  third-party provider. `DENY_DATA_COLLECTION=true` is the guard for that (D-08); check it
+  against OpenRouter's current documentation before a run.
+
+`make-contact-sheet.mjs` renders `out/contact-*.jpg`: a labelled grid of the whole set, so
+a human can see what is in it without opening twenty files. Rebuild it with
+`node make-contact-sheet.mjs`.
+
 ## Output
 
 | File | Contents |
