@@ -193,11 +193,10 @@ An application ID cannot be changed once published to Play, so P12-01 must confi
 
 ## D-15 — Identity provider and account upgrade
 
-**Status:** Proposed — needs confirmation before P3-01
+**Status:** Decided — confirmed 26 September 2026
 **Relates to:** P0-03, P3-01, P3-02
-**Must be settled before:** identity integration in Phase 3
 
-Recommendation: **Supabase Auth**, in a project pinned to the Mumbai region (D-16).
+Supabase Auth, in a project pinned to the Mumbai region (D-16). The provider and the upgrade methods below are now committed; changing them requires a new entry.
 
 Why it fits the journey rather than fighting it:
 
@@ -223,10 +222,10 @@ Not yet done: nothing has been integrated, no project exists yet, and current pr
 
 ## D-16 — Hosting, database, storage, and secrets
 
-**Status:** Proposed — needs confirmation before infrastructure provisioning (answers D-07)
+**Status:** Proposed — Supabase confirmed for database, Auth and Storage (D-15); the container host still needs confirmation before provisioning
 **Relates to:** P0-04, P11-01
 
-Recommendation: two vendors, both with an India region.
+Supabase is settled for PostgreSQL, Auth and object storage in Mumbai. What remains proposed is where the API and worker containers run.
 
 1. **Supabase Pro, Mumbai (`ap-south-1`)** — PostgreSQL, Auth (D-15), and private object storage with signed URLs; the region choice decides where the data physically lives, which fits the India-first audience and the DPDP conversation (P0-09).
 2. **DigitalOcean App Platform, Bangalore (`BLR1`)** — the two long-running containers (API and worker) from one image with different commands, behind managed TLS, with encrypted environment variables as the MVP's secret store. App Platform is available in BLR; **Fly.io has no India region** (closest is Singapore), which rules it out for an India-first launch; Railway and Render have no India regions either.
@@ -254,7 +253,7 @@ Verify before committing: current Supabase Pro limits (database size, storage, e
 |---|---|---|
 | P0-01 | Launch scope confirmation | D-09 |
 | P0-02 | Package pinning beyond SDK | D-01 |
-| P0-03 | Identity provider | D-15 (proposed) |
+| P0-03 | Identity provider | D-15 (decided) |
 | P0-04 | Hosting, storage, secrets, budget | D-16 (proposed) |
 | P0-05 | Vision provider quality and data handling | D-04, D-08 |
 | P0-06 | Label catalog, traditions, source reviewers | D-11 |
