@@ -101,6 +101,204 @@ class UploadTicket {
   final Map<String, String> requiredHeaders;
 }
 
+/// Where an object sits in the image, in fractions of width and height.
+class BoundingBoxView {
+  const BoundingBoxView({
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+  });
+
+  final double x;
+  final double y;
+  final double width;
+  final double height;
+
+  static BoundingBoxView? fromJson(Object? value) {
+    if (value is! Map<String, Object?>) return null;
+    final double? x = (value['x'] as num?)?.toDouble();
+    final double? y = (value['y'] as num?)?.toDouble();
+    final double? width = (value['width'] as num?)?.toDouble();
+    final double? height = (value['height'] as num?)?.toDouble();
+    if (x == null || y == null || width == null || height == null) return null;
+    return BoundingBoxView(x: x, y: y, width: width, height: height);
+  }
+}
+
+/// One thing the model reported, as the confirmation screen shows it.
+class ObservationView {
+  const ObservationView({
+    required this.id,
+    required this.category,
+    required this.label,
+    required this.representationType,
+    required this.verificationRequired,
+    this.groupId,
+    this.memberLabels,
+    this.boundingBox,
+    this.modelConfidence,
+  });
+
+  final String id;
+  final String category;
+  final String label;
+  final String representationType;
+  final bool verificationRequired;
+  final String? groupId;
+  final List<String>? memberLabels;
+
+  /// Null means the object was not localized, so no overlay is drawn for it.
+  final BoundingBoxView? boundingBox;
+
+  /// The model's own number. Not a calibrated probability (PRD section 10), which is why
+  /// the screen never presents it as one.
+  final double? modelConfidence;
+
+  static ObservationView fromJson(Map<String, Object?> json) {
+    final Object? members = json['memberLabels'];
+    return ObservationView(
+      id: '${json['id']}',
+      category: '${json['category']}',
+      label: '${json['label']}',
+      representationType: '${json['representationType']}',
+      verificationRequired: json['verificationRequired'] == true,
+      groupId: json['groupId'] as String?,
+      memberLabels: members is List
+          ? members.map((Object? member) => '$member').toList()
+          : null,
+      boundingBox: BoundingBoxView.fromJson(json['boundingBox']),
+      modelConfidence: (json['modelConfidence'] as num?)?.toDouble(),
+    );
+  }
+}
+
+/// Which model answered, and how the gate judged the photo.
+class VisionRunView {
+  const VisionRunView({
+    required this.model,
+    required this.imageUsable,
+    required this.looksLikeHomeMandir,
+    required this.qualityReasons,
+  });
+
+  final String model;
+  final bool imageUsable;
+  final bool looksLikeHomeMandir;
+  final List<String> qualityReasons;
+
+  static VisionRunView fromJson(Map<String, Object?> json) {
+    final Object? reasons = json['qualityReasons'];
+    return VisionRunView(
+      model: '${json['model']}',
+      imageUsable: json['imageUsable'] == true,
+      looksLikeHomeMandir: json['looksLikeHomeMandir'] == true,
+      qualityReasons: reasons is List
+          ? reasons.map((Object? reason) => '$reason').toList()
+          : const <String>[],
+    );
+  }
+}
+
+/// What the model saw, with the versions that produced it.
+class ScanObservations {
+  const ScanObservations({
+    required this.scanId,
+    required this.imageRevision,
+    required this.inputRevision,
+    required this.analysed,
+    required this.observations,
+    this.run,
+  });
+
+  final String scanId;
+  final int imageRevision;
+  final int inputRevision;
+  final bool analysed;
+  final List<ObservationView> observations;
+  final VisionRunView? run;
+
+  static ScanObservations fromJson(Map<String, Object?> json) {
+    final Object? raw = json['observations'];
+    final Object? run = json['run'];
+    return ScanObservations(
+      scanId: '${json['scanId']}',
+      imageRevision: (json['imageRevision'] as num?)?.toInt() ?? 0,
+      inputRevision: (json['inputRevision'] as num?)?.toInt() ?? 0,
+      analysed: json['analysed'] == true,
+      observations: raw is List
+          ? raw
+                .whereType<Map<String, Object?>>()
+                .map(ObservationView.fromJson)
+                .toList(growable: false)
+          : const <ObservationView>[],
+      run: run is Map<String, Object?> ? VisionRunView.fromJson(run) : null,
+    );
+  }
+}
+
+/// One object on its way back to the server as part of a confirmation.
+class ConfirmedObjectInput {
+  const ConfirmedObjectInput({
+    required this.id,
+    required this.label,
+    required this.category,
+    required this.representationType,
+    required this.verificationRequired,
+    required this.action,
+    this.groupId,
+    this.memberLabels,
+    this.boundingBox,
+    this.modelConfidence,
+    this.correctedFrom,
+  });
+
+  final String id;
+  final String label;
+  final String category;
+  final String representationType;
+  final bool verificationRequired;
+
+  /// One of `confirmed`, `corrected`, `added`.
+  final String action;
+  final String? groupId;
+  final List<String>? memberLabels;
+  final BoundingBoxView? boundingBox;
+  final double? modelConfidence;
+  final String? correctedFrom;
+
+  Map<String, Object?> toJson() {
+    final BoundingBoxView? box = boundingBox;
+    return <String, Object?>{
+      'id': id,
+      'label': label,
+      'category': category,
+      'representationType': representationType,
+      'groupId': groupId,
+      'memberLabels': memberLabels,
+      'boundingBox': box == null
+          ? null
+          : <String, Object?>{
+              'x': box.x,
+              'y': box.y,
+              'width': box.width,
+              'height': box.height,
+            },
+      'modelConfidence': modelConfidence,
+      'verificationRequired': verificationRequired,
+      'action': action,
+      'correctedFrom': correctedFrom,
+    };
+  }
+}
+
+class ConfirmationResult {
+  const ConfirmationResult({required this.inputRevision, required this.status});
+
+  final int inputRevision;
+  final String status;
+}
+
 /// The scan endpoints of the backend (ARCHITECTURE.md section 10).
 ///
 /// Authorization is the session's bearer token, fetched per call and refreshed once on a
@@ -196,6 +394,48 @@ class ScanApi {
       ),
     );
     return _snapshot(outcome);
+  }
+
+  /// What the model saw, for the confirmation screen.
+  Future<ScanObservations> readObservations({required String scanId}) async {
+    final HttpOutcome outcome = await _authorized(
+      (String token) => _transport.get(
+        _resolve('/v1/scans/$scanId/observations'),
+        headers: _headers(token),
+      ),
+    );
+    return ScanObservations.fromJson(_requireBody(outcome));
+  }
+
+  /// Sends the user's confirmation, which becomes the input every later stage reads.
+  ///
+  /// [expectedImageRevision] is the photo the user was looking at. The server refuses a
+  /// confirmation written against an older one rather than attaching a report to an image
+  /// the user never saw (TASKS P5-07).
+  Future<ConfirmationResult> confirm({
+    required String scanId,
+    required int expectedImageRevision,
+    required List<ConfirmedObjectInput> objects,
+    Map<String, String> context = const <String, String>{},
+  }) async {
+    final HttpOutcome outcome = await _authorized(
+      (String token) => _transport.post(
+        _resolve('/v1/scans/$scanId/confirmation'),
+        headers: _headers(token),
+        jsonBody: <String, Object?>{
+          'expectedImageRevision': expectedImageRevision,
+          'objects': objects
+              .map((ConfirmedObjectInput object) => object.toJson())
+              .toList(),
+          'context': context,
+        },
+      ),
+    );
+    final Map<String, Object?> body = _requireBody(outcome);
+    return ConfirmationResult(
+      inputRevision: (body['inputRevision'] as num?)?.toInt() ?? 0,
+      status: '${body['status']}',
+    );
   }
 
   Map<String, String> _headers(String token) => <String, String>{

@@ -48,6 +48,7 @@ const EVENT_TO_JOB: Record<string, string> = {
   // The analysis is stored and the scan waits for the user's confirmation. Report
   // generation reads the confirmed revision and arrives with Phase 7.
   'scan.analyzed': 'scan.generate_report',
+  'scan.confirmed': 'scan.generate_report',
 };
 
 export interface DispatchResult {

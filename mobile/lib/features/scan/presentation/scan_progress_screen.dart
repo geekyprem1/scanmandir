@@ -16,12 +16,48 @@ import '../application/scan_submission_controller.dart';
 /// in, not how far along it is, so the screen shows the state and never invents a
 /// percentage. A failure that the user can act on offers its action — retry for a
 /// recoverable one, a way back to the picker for a terminal one.
-class ScanProgressScreen extends ConsumerWidget {
+class ScanProgressScreen extends ConsumerStatefulWidget {
   const ScanProgressScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ScanProgressScreen> createState() => _ScanProgressScreenState();
+}
+
+class _ScanProgressScreenState extends ConsumerState<ScanProgressScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // The analysis can finish before this screen is built — a local server answers in
+    // milliseconds — and a listener only fires on a change. Without this check the user
+    // would arrive at a stage list that had already finished and never move on.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _handOverIfReady());
+  }
+
+  void _handOverIfReady() {
+    if (!mounted) return;
+    final ScanSubmission? submission = ref
+        .read(scanSubmissionControllerProvider)
+        .valueOrNull;
+    if (submission?.stage == ScanStage.readyForConfirmation) {
+      context.go('/scan/detected');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
+
+    // When the analysis is done, the next step belongs to the user, so the screen hands
+    // over rather than showing a stage list that has nowhere to go.
+    ref.listen<UiState<ScanSubmission>>(scanSubmissionControllerProvider, (
+      UiState<ScanSubmission>? previous,
+      UiState<ScanSubmission> next,
+    ) {
+      if (next.valueOrNull?.stage == ScanStage.readyForConfirmation) {
+        context.go('/scan/detected');
+      }
+    });
+
     final UiState<ScanSubmission> state = ref.watch(
       scanSubmissionControllerProvider,
     );

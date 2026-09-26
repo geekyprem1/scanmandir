@@ -98,6 +98,12 @@ class ScanSubmissionController extends Notifier<UiState<ScanSubmission>> {
   /// "nothing yet, offer a way to start", the other is "work in progress".
   bool get hasStarted => _photo != null;
 
+  /// The photo this submission is about, while it is still in memory.
+  ///
+  /// Kept so the confirmation screen can show the boxes over the image the model actually
+  /// saw. Null after the app restarts, which is why no screen may depend on it existing.
+  Uint8List? get photo => _photo;
+
   /// Uploads one photo and follows its scan.
   Future<void> submit({
     required Uint8List photo,

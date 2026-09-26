@@ -9,7 +9,6 @@ import 'package:scan_my_mandir/features/home/presentation/home_screen.dart';
 import 'package:scan_my_mandir/features/onboarding/application/onboarding_controller.dart';
 import 'package:scan_my_mandir/features/report/presentation/report_overview_screen.dart';
 import 'package:scan_my_mandir/features/scan/presentation/context_questions_screen.dart';
-import 'package:scan_my_mandir/features/scan/presentation/detected_items_screen.dart';
 
 import '../support/fake_auth_service.dart';
 import '../support/fake_http_transport.dart';
@@ -102,9 +101,6 @@ void main() {
       );
       expect(tester.takeException(), isNull);
 
-      await tapAt(tester, find.text('Continue'));
-      expect(tester.takeException(), isNull);
-
       await tapAt(tester, find.text('View report'));
       expect(tester.takeException(), isNull);
 
@@ -118,30 +114,6 @@ void main() {
     });
   });
 
-  testWidgets('icon-only controls carry their purpose into accessibility', (
-    WidgetTester tester,
-  ) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-
-    await pumpApp(tester);
-    await tapAt(
-      tester,
-      find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
-    );
-
-    // IconButton tooltips reach assistive technology as the node's tooltip.
-    expect(
-      tester.semantics.find(find.byTooltip('Confirm').first),
-      isSemantics(tooltip: 'Confirm'),
-    );
-    expect(
-      tester.semantics.find(find.byTooltip('Remove').first),
-      isSemantics(tooltip: 'Remove'),
-    );
-
-    handle.dispose();
-  });
-
   testWidgets('system back walks the journey backwards', (
     WidgetTester tester,
   ) async {
@@ -151,7 +123,6 @@ void main() {
       tester,
       find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
     );
-    await tapAt(tester, find.text('Continue'));
     await tapAt(tester, find.text('View report'));
     await scrollTo(tester, find.text('Two similar deity images'));
     await tapAt(tester, find.text('Two similar deity images'));
@@ -166,11 +137,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ContextQuestionsScreen), findsOneWidget);
 
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-    expect(find.byType(DetectedItemsScreen), findsOneWidget);
-
-    // The fixture journey starts at the preview entry point, so this lands on Home.
+    // The fixture walk starts at the preview entry point, so this lands on Home.
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.byType(HomeScreen), findsOneWidget);
@@ -185,16 +152,17 @@ void main() {
       tester,
       find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
     );
-    await tapAt(tester, find.byTooltip('Confirm').first);
-    expect(find.text('Confirmed'), findsOneWidget);
+    await tapAt(tester, find.text('View report'));
+    await scrollTo(tester, find.text('Two similar deity images'));
+    await tapAt(tester, find.text('Two similar deity images'));
+    expect(find.text('What we saw'), findsOneWidget);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     await tester.pump();
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
 
-    // Same screen, same edits: nothing is rebuilt away by a trip to the background.
-    expect(find.text('Detected items'), findsOneWidget);
-    expect(find.text('Confirmed'), findsOneWidget);
+    // Same screen, same content: nothing is rebuilt away by a trip to the background.
+    expect(find.text('What we saw'), findsOneWidget);
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scan_my_mandir/app/app.dart';
@@ -25,6 +27,7 @@ Future<FakeHttpTransport> pumpCapture(
   required FakeMediaPicker picker,
   List<String> statuses = const <String>['completed'],
   int maxPolls = 2,
+  PollDelay? delay,
 }) async {
   final ScanServer server = ScanServer(<String>[...statuses]);
   final FakeHttpTransport transport = FakeHttpTransport(
@@ -41,7 +44,9 @@ Future<FakeHttpTransport> pumpCapture(
         // A scan starts a guest session on demand; tests must not reach Supabase.
         authServiceProvider.overrideWithValue(FakeAuthService()),
         // No real waiting in tests.
-        pollDelayProvider.overrideWithValue((Duration duration) async {}),
+        pollDelayProvider.overrideWithValue(
+          delay ?? (Duration duration) async {},
+        ),
         pollPolicyProvider.overrideWithValue(
           PollPolicy(
             firstDelay: const Duration(milliseconds: 1),
@@ -108,26 +113,35 @@ void main() {
       isEmpty,
     );
 
-    // The fallback is the point: the gallery still works.
+    // The fallback is the point: the gallery still works, and a finished analysis hands
+    // over to the confirmation screen rather than stopping at a stage list.
     await tester.tap(find.text('Choose from gallery'));
     await tester.pumpAndSettle();
 
     expect(picker.galleryCalls, 1);
-    expect(find.text('Ready for your review'), findsOneWidget);
+    expect(find.text('Detected items'), findsOneWidget);
   });
 
   testWidgets('a picked photo is uploaded and the stages are shown', (
     WidgetTester tester,
   ) async {
+    // The analysis is still running, so the screen stays and shows the server's stages.
+    // The delay never completes, which parks the poll loop mid-wait: that is what an
+    // in-flight analysis looks like, without the test having to race a timer.
     final FakeHttpTransport transport = await pumpCapture(
       tester,
       picker: FakeMediaPicker(photo: samplePickedPhoto()),
+      statuses: <String>['analyzing'],
+      delay: (Duration duration) => Completer<void>().future,
     );
 
     await tester.tap(find.text('Choose from gallery'));
-    await tester.pumpAndSettle();
-
-    // The server's own states, named. No percentage anywhere.
+    // pumpAndSettle cannot be used here: an in-flight analysis shows an animating progress
+    // bar, so no frame ever settles. A few pumps are enough for the submission's futures
+    // and for the navigation.
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
     expect(find.text('Uploading your photo'), findsOneWidget);
     expect(find.text('Identifying visible objects'), findsOneWidget);
     expect(find.text('Ready for your review'), findsOneWidget);

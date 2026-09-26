@@ -7,11 +7,18 @@ import {
   insertScan,
   lockOwnedScan,
   recordOriginalMedia,
+  setScanInputRevision,
   setScanStatus,
   type Scan,
   type ScanStatus,
 } from '../../modules/scans/scan_repository.js';
 import { findLatestAnalysis } from '../../modules/vision/repository.js';
+import {
+  ALL_CANDIDATE_LABELS,
+  OBSERVATION_CATEGORIES,
+  REPRESENTATION_TYPES,
+} from '../../modules/vision/schema.js';
+import { findScanInput, insertScanInput } from '../../modules/scans/confirmation_repository.js';
 import { getConfig } from '../../shared/config.js';
 import { getPool, withTransaction } from '../../shared/db/pool.js';
 import { AppError, ERROR_CODES } from '../../shared/errors.js';
@@ -26,6 +33,58 @@ const CreateScanSchema = z.object({ idempotencyKey: z.string().min(8).max(128) }
 const UploadUrlSchema = z.object({ contentType: z.string().min(3).max(64) }).strict();
 const UploadCompleteSchema = z.object({ stagingKey: z.string().min(1).max(256) }).strict();
 const ScanParamsSchema = z.object({ id: z.string().uuid() });
+
+const ConfirmationBoxSchema = z
+  .object({
+    x: z.number().min(0).max(1),
+    y: z.number().min(0).max(1),
+    width: z.number().min(0).max(1),
+    height: z.number().min(0).max(1),
+  })
+  .strict()
+  // Each field being in range is not enough: a box can start at 0.9 and be 0.5 wide, which
+  // is not a region of the image at all. Overlays are only drawn for a box that survived
+  // this check (TASKS P5-05).
+  .refine(
+    (box) => box.x + box.width <= 1.0001 && box.y + box.height <= 1.0001,
+    'bounding box must stay inside the image',
+  );
+
+const catalogLabel = (value: string): boolean => ALL_CANDIDATE_LABELS.includes(value);
+
+/**
+ * One confirmed object. A label outside the catalog is refused rather than stored: the
+ * catalog is what the rules engine and the localization files are built against
+ * (TASKS P5-03, P5-06).
+ */
+const ConfirmationObjectSchema = z
+  .object({
+    id: z.string().min(1).max(64),
+    label: z.string().min(1).max(64).refine(catalogLabel, 'label is outside the supported catalog'),
+    category: z.enum(OBSERVATION_CATEGORIES),
+    representationType: z.enum(REPRESENTATION_TYPES),
+    groupId: z.string().max(64).nullable(),
+    memberLabels: z
+      .array(z.string().max(64).refine(catalogLabel, 'member label is outside the catalog'))
+      .max(24)
+      .nullable(),
+    boundingBox: ConfirmationBoxSchema.nullable(),
+    /** Null for an object the user added: nothing was measured, so nothing is claimed. */
+    modelConfidence: z.number().min(0).max(1).nullable(),
+    verificationRequired: z.boolean(),
+    action: z.enum(['confirmed', 'corrected', 'added']),
+    correctedFrom: z.string().max(64).nullable(),
+  })
+  .strict();
+
+const ConfirmScanSchema = z
+  .object({
+    /** The image revision the client was looking at. A newer one makes this a stale edit. */
+    expectedImageRevision: z.number().int().positive(),
+    objects: z.array(ConfirmationObjectSchema).max(50),
+    context: z.record(z.string().max(64), z.string().max(64)).default({}),
+  })
+  .strict();
 
 /** What the client should do next, derived from the state (ARCHITECTURE.md section 6). */
 function nextActionFor(status: ScanStatus): string {
@@ -344,6 +403,113 @@ export async function registerScanRoutes(server: AppServer): Promise<void> {
         verificationRequired: observation.verificationRequired,
       })),
       findings: analysis.findings,
+    };
+  });
+
+  /**
+   * The user's confirmation: the immutable input every downstream stage reads (TASKS P5-07).
+   *
+   * Atomic on purpose. The confirmed objects, the new input revision, the state change and
+   * the promise to generate a report commit together, so there is no moment where a scan
+   * says it is generating a report from an input that was never stored.
+   *
+   * A client that confirms against an older photo is refused rather than trusted: a retake
+   * between reading and confirming would otherwise attach a report to the wrong image.
+   */
+  server.post('/v1/scans/:id/confirmation', { preHandler: server.authenticate }, async (request, reply) => {
+    const caller = requireCaller(request);
+    const { id } = parseOrThrow(ScanParamsSchema, request.params);
+    const body = parseOrThrow(ConfirmScanSchema, request.body);
+
+    const outcome = await withTransaction(async (tx) => {
+      const scan = await lockOwnedScan(tx, caller.id, id);
+      if (!scan) {
+        throw new AppError(ERROR_CODES.NOT_FOUND, 'Scan not found.');
+      }
+
+      if (scan.imageRevision !== body.expectedImageRevision) {
+        throw new AppError(
+          ERROR_CODES.REVISION_CONFLICT,
+          'This scan has a newer photo. Read the scan again before confirming.',
+          { details: { imageRevision: scan.imageRevision } },
+        );
+      }
+
+      if (scan.status !== 'awaiting_confirmation') {
+        throw new AppError(
+          ERROR_CODES.REVISION_CONFLICT,
+          `This scan is ${scan.status}, so it is not waiting for a confirmation.`,
+          { details: { status: scan.status } },
+        );
+      }
+
+      const inputRevision = scan.inputRevision + 1;
+      await insertScanInput(tx, {
+        scanId: scan.id,
+        inputRevision,
+        imageRevision: scan.imageRevision,
+        objects: body.objects,
+        context: body.context,
+      });
+      await setScanInputRevision(tx, scan.id, inputRevision, 'generating_report');
+
+      await appendOutboxEvent(tx, {
+        eventType: 'scan.confirmed',
+        aggregateType: 'scan',
+        aggregateId: scan.id,
+        // Named for the input it carries, because a second confirmation produces a second
+        // report rather than a retry of the first.
+        dedupeKey: `scan:${scan.id}:report:input${inputRevision}`,
+        payload: {
+          scanId: scan.id,
+          userId: caller.id,
+          imageRevision: scan.imageRevision,
+          inputRevision,
+        },
+      });
+
+      return {
+        scanId: scan.id,
+        imageRevision: scan.imageRevision,
+        inputRevision,
+        status: 'generating_report' as const,
+      };
+    });
+
+    reply.code(201);
+    return outcome;
+  });
+
+  /** The confirmed input a report is generated from, for the report screen and for audit. */
+  server.get('/v1/scans/:id/input', { preHandler: server.authenticate }, async (request) => {
+    const caller = requireCaller(request);
+    const { id } = parseOrThrow(ScanParamsSchema, request.params);
+
+    const scan = await findOwnedScan(getPool(), caller.id, id);
+    if (!scan) {
+      throw new AppError(ERROR_CODES.NOT_FOUND, 'Scan not found.');
+    }
+
+    if (scan.inputRevision === 0) {
+      // Nothing confirmed yet, which the scan's own status already explains.
+      return { scanId: scan.id, inputRevision: 0, confirmed: false, objects: [], context: {} };
+    }
+
+    const input = await findScanInput(getPool(), scan.id, scan.inputRevision);
+    if (!input) {
+      // Unreachable while the two are written together; kept so a future bug is a clear
+      // error rather than an empty report.
+      throw new AppError(ERROR_CODES.INTERNAL, 'The confirmed input for this scan is missing.');
+    }
+
+    return {
+      scanId: scan.id,
+      inputRevision: input.inputRevision,
+      imageRevision: input.imageRevision,
+      confirmed: true,
+      confirmedAt: input.createdAt.toISOString(),
+      objects: input.objects,
+      context: input.context,
     };
   });
 }

@@ -49,15 +49,13 @@ Future<void> tapAt(WidgetTester tester, Finder finder) async {
 
 /// Walks from Home to the report overview.
 ///
-/// The journey after capture is still a fixture (P2-05); scanning itself is real, so the
-/// fixture walk starts at the preview entry point rather than at the camera.
+/// Capture, progress and the confirmation screen are real now, so the fixture walk starts
+/// at the one fixture screen that remains in the journey: the context questions.
 Future<void> walkToReport(
   WidgetTester tester, {
-  String continueLabel = 'Continue',
   String previewLabel = 'Journey preview (sample data)',
 }) async {
   await tapAt(tester, find.widgetWithText(ActionCard, previewLabel));
-  await tapAt(tester, find.text(continueLabel));
   await tapAt(tester, find.text('View report'));
 }
 
@@ -79,9 +77,6 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('Detected items'), findsOneWidget);
-
-    await tapAt(tester, find.text('Continue'));
     expect(find.text('A few questions'), findsOneWidget);
 
     await tapAt(tester, find.text('View report'));
@@ -89,57 +84,6 @@ void main() {
     expect(find.text('Items detected: 4'), findsOneWidget);
     expect(find.text('Findings requiring review: 1'), findsOneWidget);
     expect(find.text('Findings requiring verification: 1'), findsOneWidget);
-  });
-
-  testWidgets('detected items can be confirmed, removed and added', (
-    WidgetTester tester,
-  ) async {
-    await pumpJourney(tester);
-
-    await tapAt(
-      tester,
-      find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
-    );
-
-    await tapAt(tester, find.byTooltip('Confirm').first);
-    expect(find.text('Confirmed'), findsOneWidget);
-
-    await tapAt(tester, find.byTooltip('Remove').first);
-    expect(find.text('Lakshmi idol'), findsNothing);
-
-    await tapAt(tester, find.text('Add item'));
-    await tester.enterText(find.byType(TextField), 'Kalash');
-    await tapAt(tester, find.text('Add'));
-    expect(find.text('Kalash'), findsOneWidget);
-  });
-
-  testWidgets('removing every item shows an empty state with a way out', (
-    WidgetTester tester,
-  ) async {
-    await pumpJourney(tester);
-
-    await tapAt(
-      tester,
-      find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
-    );
-
-    for (int i = 0; i < 4; i++) {
-      await tapAt(tester, find.byTooltip('Remove').first);
-    }
-
-    expect(find.text('No items on the list'), findsOneWidget);
-    expect(
-      find.text('Everything was removed. Add what you can see in the photo.'),
-      findsOneWidget,
-    );
-
-    // The empty state offers the action that fills it.
-    await tapAt(tester, find.text('Add item'));
-    await tester.enterText(find.byType(TextField), 'Kalash');
-    await tapAt(tester, find.text('Add'));
-
-    expect(find.text('Kalash'), findsOneWidget);
-    expect(find.text('No items on the list'), findsNothing);
   });
 
   testWidgets('a finding shows its explainability blocks and its source', (
@@ -191,9 +135,9 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('पहचानी गई वस्तुएँ'), findsOneWidget);
+    expect(find.text('पहचानी गई वस्तुएँ'), findsNothing);
+    expect(find.text('कुछ सवाल'), findsOneWidget);
 
-    await tapAt(tester, find.text('जारी रखें'));
     await tapAt(tester, find.text('रिपोर्ट देखें'));
 
     expect(find.text('मंदिर स्कैन पूरा हुआ'), findsOneWidget);

@@ -46,7 +46,6 @@ GoRouter createRouter({
       final bool isFixtureRoute =
           path == '/report' ||
           path.startsWith('/report/') ||
-          path == '/scan/detected' ||
           path == '/scan/context';
       return isFixtureRoute ? '/' : null;
     },

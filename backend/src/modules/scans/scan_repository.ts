@@ -153,6 +153,29 @@ export async function setScanStatus(
   );
 }
 
+/**
+ * Records a new confirmed input revision and the state it puts the scan in.
+ *
+ * Written together on purpose: an increment without the state change would leave a scan
+ * waiting for a confirmation it already has, and a state change without the increment would
+ * let the next confirmation overwrite the input a report is being built from.
+ */
+export async function setScanInputRevision(
+  db: Queryable,
+  scanId: string,
+  inputRevision: number,
+  status: ScanStatus,
+): Promise<void> {
+  await db.query(
+    `UPDATE scans
+        SET input_revision = $2,
+            status = $3,
+            updated_at = now()
+      WHERE id = $1`,
+    [scanId, inputRevision, status],
+  );
+}
+
 export interface RecordOriginalMediaInput {
   scanId: string;
   imageRevision: number;
