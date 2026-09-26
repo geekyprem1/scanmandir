@@ -1,0 +1,214 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Scan My Mandir",
+  "@appTitle": {
+    "description": "Product name. Not translated."
+  },
+
+  "homeTagline": "Understand your home mandir, with tradition.",
+  "@homeTagline": {
+    "description": "Short line under the product name on the home screen."
+  },
+
+  "homeScanAction": "Scan My Mandir",
+  "@homeScanAction": {
+    "description": "Primary call to action on the home screen."
+  },
+
+  "homeUploadAction": "Upload Photo",
+  "homeReportsAction": "My Reports",
+  "homeMandirProfileAction": "Mandir Profile",
+  "homeSettingsAction": "Settings",
+
+  "settingsTitle": "Settings",
+  "settingsLanguage": "Language",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageHindi": "हिन्दी",
+
+  "settingsBackendStatus": "Backend status",
+  "@settingsBackendStatus": {
+    "description": "Developer-facing connectivity check, not a user feature."
+  },
+
+  "statusChecking": "Checking…",
+  "statusReachable": "Reachable",
+  "statusUnreachable": "Not reachable",
+  "actionRetry": "Retry",
+
+  "disclaimerTitle": "Terms and disclaimer",
+  "disclaimerBody": "Scan My Mandir offers informational and organizational help only. Traditional guidance varies by tradition, region and family practice. This app does not replace a qualified priest or any professional advice, and it does not detect spiritual or supernatural conditions.",
+  "@disclaimerBody": {
+    "description": "Required by PRD section 5.3. Must stay reachable from onboarding, Settings and every report."
+  },
+
+  "notImplementedYet": "Not built yet",
+  "@notImplementedYet": {
+    "description": "Placeholder for a screen that exists as a route but has no implementation. Must never look like a real result."
+  },
+
+  "notImplementedDetail": "This screen is part of a later phase. Nothing here is a real scan result.",
+
+  "errorUnexpected": "Something went wrong.",
+  "errorNoConnection": "No internet connection.",
+  "errorTimeout": "The request took too long. Try again.",
+  "errorSessionExpired": "Your session has expired. Sign in again to continue.",
+  "errorNotPermitted": "You do not have access to this.",
+  "errorNotFound": "This is no longer available.",
+  "errorConflict": "This was changed somewhere else. Reload it and try again.",
+  "errorQuotaExceeded": "You have used all your scans for now.",
+  "errorImageUnusable": "This photo cannot be analysed. Take a new photo.",
+  "errorImageExpired": "This photo is no longer available.",
+  "errorAnalysisUnavailable": "The analysis service is unavailable right now. Try again in a little while.",
+  "@errorAnalysisUnavailable": {
+    "description": "Copy for every FailureKind, rendered by FailureView so no screen writes its own error wording."
+  },
+
+  "onboardingLanguageTitle": "Choose your language",
+  "@onboardingLanguageTitle": {
+    "description": "First onboarding step; language selection on first launch (PRD section 7.1)."
+  },
+
+  "onboardingLanguageDetail": "You can change this later in Settings.",
+
+  "onboardingIntroTitle": "Understand your home mandir",
+  "onboardingIntroBody": "Take a photo of your mandir. Scan My Mandir identifies the deities and objects it can see, then shares traditional guidance with its sources. Guidance is informational and varies by tradition.",
+
+  "onboardingPrivacyTitle": "Your photo, your privacy",
+  "onboardingPrivacyBody": "Your photo is uploaded only to analyse the mandir in it, and is not used to train AI models without your explicit consent. You can delete any scan, its photo, or your account at any time. Camera and gallery access is requested only when you use them.",
+  "@onboardingPrivacyBody": {
+    "description": "Photo privacy summary. Wording must be reconciled with the confirmed provider routing, retention periods and legal review (P0-05, P0-07, P0-09) before launch."
+  },
+
+  "onboardingNext": "Next",
+  "onboardingBack": "Back",
+  "onboardingStart": "Get started",
+
+  "fixtureNotice": "Development preview with sample data — not a real scan result.",
+  "@fixtureNotice": {
+    "description": "Banner on every journey screen that renders development fixtures (TASKS P2-05). Must never be mistaken for a real result."
+  },
+
+  "scanProgressTitle": "Scan progress",
+  "scanStageReceived": "Photo received",
+  "scanStageIdentifying": "Identifying visible objects",
+  "scanStageChecking": "Checking arrangement",
+  "@scanStageChecking": {
+    "description": "Stage names from PRD section 34. Meaningful stages only; never a fabricated percentage."
+  },
+
+  "actionContinue": "Continue",
+
+  "detectedItemsTitle": "Detected items",
+  "detectedItemsIntro": "Check what the app can see. Correct anything that is wrong before continuing.",
+  "detectedItemsEmptyTitle": "No items on the list",
+  "detectedItemsEmptyDetail": "Everything was removed. Add what you can see in the photo.",
+  "detectedItemConfirmed": "Confirmed",
+  "actionConfirm": "Confirm",
+  "actionRemove": "Remove",
+  "detectedAddAction": "Add item",
+  "detectedAddTitle": "Add an item",
+  "detectedAddFieldLabel": "Item name",
+  "actionAdd": "Add",
+  "actionCancel": "Cancel",
+
+  "fixtureItemLakshmi": "Lakshmi idol",
+  "fixtureItemGanesha": "Ganesha picture",
+  "fixtureItemDiya": "Diya",
+  "fixtureItemIncense": "Incense holder",
+  "fixtureKindIdol": "Idol",
+  "fixtureKindPicture": "Picture",
+  "fixtureKindLamp": "Lamp",
+  "fixtureKindPuja": "Puja item",
+  "@fixtureKindPuja": {
+    "description": "Sample detected items. Illustrative only: the launch label catalog is not settled (P0-06)."
+  },
+
+  "contextTitle": "A few questions",
+  "contextIntro": "These answers guide which traditional guidance applies. Any question can be skipped.",
+  "contextTraditionQuestion": "Which tradition does your family follow?",
+  "contextTraditionNorth": "North Indian",
+  "contextTraditionSouth": "South Indian",
+  "contextTraditionOther": "Other",
+  "contextNoSay": "Prefer not to say",
+  "@contextTraditionQuestion": {
+    "description": "Illustrative options; the launch tradition taxonomy is not settled (P0-06)."
+  },
+  "contextFlameQuestion": "Is an open flame (diya or lamp) used in this mandir?",
+  "contextFlameYes": "Yes",
+  "contextFlameNo": "No",
+  "contextFlameUnsure": "Not sure",
+
+  "viewReportAction": "View report",
+
+  "reportTitle": "Report",
+  "reportComplete": "Mandir scan complete",
+  "reportItemsDetected": "Items detected: {count}",
+  "@reportItemsDetected": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reportNeedingReview": "Findings requiring review: {count}",
+  "@reportNeedingReview": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reportNeedingVerify": "Findings requiring verification: {count}",
+  "@reportNeedingVerify": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reportSectionSafety": "Safety",
+  "reportSectionGood": "Looks good",
+  "reportSectionReview": "Review",
+  "reportSectionVerify": "Verify",
+  "@reportSectionVerify": {
+    "description": "Report severity names from PRD section 20: Looks Good, Review, Verify."
+  },
+  "reportSourcesTitle": "Sources",
+
+  "findingWhatWeSaw": "What we saw",
+  "findingWhyFlagged": "Why it was flagged",
+  "findingWhatYouCanDo": "What you can do",
+  "findingUncertainty": "What could not be confirmed",
+  "findingSource": "Source",
+  "@findingWhatWeSaw": {
+    "description": "Explainability blocks from PRD section 21."
+  },
+
+  "fixtureGoodTitle": "Mandir appears organized",
+  "fixtureGoodSaw": "The idols and puja items appear arranged on a clean platform.",
+  "fixtureReviewTitle": "Two similar deity images",
+  "fixtureReviewSaw": "Two similar deity images appear visible.",
+  "fixtureReviewWhy": "Some traditional practices discuss limits or preferences around multiple representations.",
+  "fixtureReviewDo": "Review the practice followed by your family or sampradaya.",
+  "fixtureSafetyTitle": "Diya close to combustible material",
+  "fixtureSafetySaw": "A diya appears to be placed close to fabric or paper.",
+  "fixtureSafetyWhy": "An open flame near fabric or paper can catch fire.",
+  "fixtureSafetyDo": "Keep lit diyas on a metal or stone surface, away from curtains and paper.",
+  "fixtureVerifyTitle": "Idol condition could not be confirmed",
+  "fixtureVerifySaw": "The photo does not show the idol closely enough to judge its condition.",
+  "fixtureVerifyWhy": "A visual check can miss small damage.",
+  "fixtureVerifyDo": "Check the idol yourself, or take a closer photo.",
+  "fixtureVerifyUncertainty": "Whether there is any damage could not be determined from this photo.",
+
+  "fixtureSource1Title": "Household practice note (sample)",
+  "fixtureSource1Edition": "Illustrative edition, section 2",
+  "fixtureSource2Title": "Open flame safety note (sample)",
+  "fixtureSource2Edition": "Illustrative edition, section 5",
+  "fixtureSourceTraditionIllustrative": "Illustrative",
+  "fixtureSourceTraditionNotSpecific": "Not tradition-specific",
+  "fixtureSourceReviewer": "Not reviewed",
+  "@fixtureSource1Title": {
+    "description": "Sample source metadata. Placeholders must never be published as real sources (P6-02)."
+  },
+
+  "sourcePlaceholderWarning": "This is a development sample. No source has been reviewed or approved yet.",
+  "sourceFieldTitle": "Title",
+  "sourceFieldEdition": "Edition or section",
+  "sourceFieldTradition": "Tradition",
+  "sourceFieldReviewer": "Reviewer"
+}

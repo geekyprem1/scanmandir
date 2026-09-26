@@ -1,0 +1,26 @@
+{
+  "name": "vision-eval",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Throwaway spike harness: measures vision-model recognition quality, latency and cost on real mandir photos. Not part of the shipped product.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "eval": "tsx src/run.ts",
+    "eval:dry": "tsx src/run.ts --dry-run",
+    "report": "tsx src/report.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "18.0.4",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.2",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  },
+  "optionalDependencies": {
+    "sharp": "0.35.4"
+  }
+}

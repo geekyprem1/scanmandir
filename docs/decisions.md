@@ -1,0 +1,211 @@
+# Scan My Mandir — Decision Record
+
+**Started:** 26 September 2026
+**Purpose:** Satisfy the Phase 0 completion criterion in `TASKS.md` — implementation-critical dependencies need selected defaults *and a written record of why*.
+
+Every entry carries a status. Do not treat a `Proposed` or `Open` entry as settled just because it is written down.
+
+| Status | Meaning |
+|---|---|
+| **Decided** | Verified or committed. Changing it requires a new entry, not a silent edit. |
+| **Proposed** | Working default so work can continue. Must be confirmed before the listed gate. |
+| **Open** | No answer yet. Anything depending on it is blocked. |
+
+---
+
+## D-01 — Mobile framework and SDK versions
+
+**Status:** Decided
+**Relates to:** P0-02
+
+Flutter **3.44.8** stable with Dart **3.12.2**, verified locally at `C:\flutter`. `flutter doctor` reports no issues.
+
+Android toolchain verified: SDK **37.0.0**, build-tools 37.0.0, JDK 21 (Android Studio JBR), all licenses accepted. Emulator 36.5.11 is installed but no AVD or physical device is currently connected, so nothing has been run on an Android target yet.
+
+A newer Flutter release exists. Staying on 3.44.8 for now so the pinned version matches what is actually installed and tested. Upgrade deliberately, not incidentally.
+
+**Still open under P0-02:** state management approach, navigation, HTTP client, SQLite, secure storage, camera/gallery, and sensor packages. Each must be checked for current maintenance status before pinning. Resolved package choices are in D-12.
+
+## D-02 — Backend runtime
+
+**Status:** Decided
+**Relates to:** P0-02, P1-04
+
+Node **v24.16.0** with npm 11.13.0, TypeScript, Fastify modular monolith with a separate worker process, per `ARCHITECTURE.md` section 1.
+
+## D-03 — Local PostgreSQL
+
+**Status:** Decided
+**Relates to:** P1-05
+
+`psql` is not installed locally. Docker **29.7.2** is available, so local and CI PostgreSQL runs in a container. This also keeps the backend integration tests (architecture section 16) reproducible without a host database install.
+
+Production PostgreSQL hosting remains **Open** under D-07.
+
+## D-04 — Vision provider candidate
+
+**Status:** Proposed — quality unverified
+**Relates to:** P0-05, P0-06
+**Must be settled before:** real-photo integration and the privacy notice
+
+Candidate is **OpenRouter** routing to **GPT-6 Luna**, with **GPT-6 Sol** as the escalation path if Luna's recognition quality is insufficient. The adapter pattern in `ARCHITECTURE.md` section 1 means this choice can change without touching the app or report contracts.
+
+Nothing about recognition quality has been tested. Luna is the cost-efficient tier; whether it can distinguish visually similar deities — for example Lakshmi from Saraswati, both seated female forms with overlapping iconography in small home idols — is unknown and is the single most important open question in the project.
+
+## D-05 — Estimated AI cost per scan
+
+**Status:** Estimate only — not measured
+**Relates to:** P0-08
+
+Published rates as of 26 September 2026. GPT-6 Luna launched 22 September and its price was cut roughly 50% on 23 September, so **re-check before committing**.
+
+- GPT-6 Luna: **$0.10 / 1M input tokens**, **$0.50 / 1M output**, cached input $0.01 / 1M.
+- GPT-6 Sol: **$2 / 1M input**, **$10 / 1M output** — 20x Luna.
+- OpenRouter adds no per-token markup; it charges roughly **5.5%** on card credit top-ups ($0.80 minimum).
+- USD/INR basis: **95.9** (25 September 2026).
+
+Sources: [OpenRouter GPT-6 Luna](https://openrouter.ai/openai/gpt-6-luna), [OpenRouter pricing](https://openrouter.ai/pricing), [OpenAI GPT-6 Sol and Luna announcement](https://openai.com/index/introducing-gpt-6-sol-and-luna/), [USD/INR](https://tradingeconomics.com/india/currency). Figures were rephrased from these sources for licensing compliance.
+
+Assumed single vision call on a 1024x1024 normalized derivative (the derivative described in architecture section 6):
+
+| Component | Assumed tokens | Luna cost |
+|---|---|---|
+| Image, patch-based tokenization | ~1,500 | $0.00015 |
+| Prompt: schema plus label catalog | ~1,200 | $0.00012 |
+| Output: objects, findings, quality JSON | ~1,200 | $0.00060 |
+| **Total per call** | | **~$0.00087 (~₹0.08)** |
+
+With retries and the credit-purchase fee, roughly **₹0.10–0.12 per scan**. Tripling every assumption still lands near **₹0.20**. On Sol the same scan is roughly **₹2**.
+
+Every number above is an assumption. Image tokenization for this specific model was not confirmed from primary documentation, and no call has been made. The spike must replace these with measured token counts from real responses.
+
+One assumption is riskier than the rest: **output tokens.** If the model emits reasoning tokens, billed completion tokens could be several times the 1,200 assumed here, and output is five times the price of input — so that single line dominates the total. The harness records `completion_tokens` as billed per photo rather than estimating, and counts retried attempts, so the measured figure includes both. Do not quote a cost from this table once real numbers exist.
+
+## D-06 — AI cost is not the binding constraint
+
+**Status:** Decided, following from D-05
+
+At roughly ₹0.10–0.20 per scan against the ₹16 per scan implied by the pricing direction in D-09, model cost is under 1% of revenue per scan. Two consequences:
+
+1. **Select the model on recognition quality, not price.** Even a 20x escalation to Sol stays affordable, so being wrong about Luna is cheap to correct.
+2. Earlier reasoning in this project treated per-scan AI cost as a possible blocker. It is not. That reasoning is superseded.
+
+## D-07 — Hosting and fixed infrastructure
+
+**Status:** Open
+**Relates to:** P0-04
+**Must be settled before:** infrastructure provisioning
+
+Unresolved: hosting vendor and region, managed PostgreSQL, object storage, secret manager.
+
+This is now understood to be the **dominant cost driver**, not the AI. Managed PostgreSQL, an API container, a worker container, object storage, and a secret manager cost the same whether 10 or 10,000 scans run per month. At low volume the fixed monthly cost per scan can exceed the AI cost by two orders of magnitude. Google Play's service fee is also a far larger deduction than inference.
+
+Record the operating budget when this is decided.
+
+## D-08 — OpenRouter data routing and privacy
+
+**Status:** Open — launch blocker
+**Relates to:** P0-05, P0-07, P0-09
+
+OpenRouter forwards requests to third-party providers. The payload here is a photo of the inside of someone's home, potentially including family members and personal belongings.
+
+`Scan_My_Mandir_PRD.md` section 28 forbids using customer photos for model training without explicit consent, and `ARCHITECTURE.md` section 1 requires checking a vendor's data handling before integration.
+
+Required before any real user photo is sent:
+
+- Configure OpenRouter's provider data policy to exclude providers that train on submitted data.
+- Determine which providers can receive an image and what each retains.
+- Disclose the routing and retention accurately in the privacy notice.
+- Confirm that provider-side deletion is separate from our own object deletion, as architecture section 12 already states.
+
+Spike photos must be ones we own or have permission to use, and must not be treated as production user data.
+
+## D-09 — Pricing direction
+
+**Status:** Proposed — not yet in the PRD
+**Relates to:** P0-01, P10-01
+**Must be settled before:** billing activation
+
+Direction under consideration is a **scan pack** rather than a subscription: approximately **₹49 for 3 scans** (~₹16 per scan gross, ~₹14 net after Google Play's fee, which should be confirmed rather than assumed).
+
+Rationale: mandir scanning is inherently low-frequency, so recurring subscription demand is doubtful. `PRD_REVIEW.md` already recommended comparing a pack against a subscription. A pack also caps downside — a heavy user cannot consume unlimited paid inference.
+
+`Scan_My_Mandir_PRD.md` section 30 still documents the original ₹49–99/month subscription hypothesis. **Do not change the PRD until the three questions below are answered**, because section 30, section 32, and architecture section 13 must move together.
+
+1. Free tier size. It is currently 3 scans/month, which collides directly with a paid 3-scan pack — a patient user would simply wait for the reset. Free must shrink, or the paid product must sell report depth rather than scan count.
+2. Does the pack sell scans, report depth, or both? Both means two products — consumable credits plus a non-consumable unlock — and `quota_ledger` versus `entitlements` must be designed accordingly.
+3. Do purchased credits expire? Expiry complicates accounting and refunds.
+
+Whichever model is chosen, safety findings and basic source attribution stay outside the paywall per PRD sections 30 and 32.
+
+## D-10 — Quota reset timezone
+
+**Status:** Proposed
+**Relates to:** P0-10, P10-01
+
+Quota periods reset on calendar-month boundaries in **Asia/Kolkata**, fixed in server configuration, so the displayed reset date matches the India-first audience's local month. Period boundaries are stored on each reservation and never derived from a device clock. Already reflected in PRD section 30 and architecture sections 13 and 18.
+
+## D-11 — Supported label catalog
+
+**Status:** Open — blocks P1-06
+**Relates to:** P0-06
+
+The launch label catalog cannot be fixed before the spike. PRD section 10 lists 22 candidate deity categories; how many are reliably recognizable is unknown.
+
+This is not a cosmetic list. It propagates into `contracts/`, the `observations.label` column, rule conditions, and Hindi/English display strings. Building those around 22 labels and then cutting to 8 is expensive rework, so **P1-06 stays pending** while the rest of Phase 1 proceeds.
+
+---
+
+## D-12 — Flutter package choices
+
+**Status:** Decided for the packages listed; the rest remain open
+**Relates to:** P0-02
+
+Pinned exactly rather than with caret ranges, so builds are reproducible across machines and CI:
+
+| Package | Version | Why |
+|---|---|---|
+| `flutter_riverpod` | 3.4.3 | One state-management approach throughout, per architecture section 4. Chosen over Bloc for less ceremony per controller, and over plain `ChangeNotifier` because the scan lifecycle involves dependent async state where provider overrides make testing straightforward. |
+| `go_router` | 17.5.0 | Declarative routing. The scan journey is a sequence of routes rather than states inside one widget, so Android back behaviour and process death stay predictable. |
+| `intl` | 0.20.2 | Pinned to what `flutter_localizations` requires under Flutter 3.44.8. A newer 0.20.3 exists but does not resolve. |
+
+Localization uses the SDK's own `gen_l10n` with `.arb` files rather than a third-party package.
+
+Still open: HTTP client package, SQLite, secure credential storage, camera/gallery, and sensors. Phase 1 uses `dart:io` behind a transport interface, so adopting a package later cannot reach feature code. Interfaces for the platform capabilities already exist in `mobile/lib/core/platform/` with no implementations behind them.
+
+Newer major versions exist for some of these — `go_router` 18, for example. Upgrade deliberately, not incidentally.
+
+## D-13 — Local PostgreSQL ports
+
+**Status:** Decided
+**Relates to:** P1-05
+
+Development uses **5442** and integration tests use **5443**, not the defaults. Other projects on this machine already hold 5432 and 5433, and `docker compose up` failed on the collision. Both are bound to loopback only. CI overrides the test database with `TEST_DATABASE_URL`.
+
+## D-14 — Android application ID
+
+**Status:** Decided; confirm before the first upload
+**Relates to:** P12-01
+
+`com.scanmymandir.app`, with `.debug` appended for debug builds so a debug and a release build can sit on one device. The Kotlin namespace stays as generated, `com.scanmymandir.scan_my_mandir`; it does not need to equal the application ID.
+
+An application ID cannot be changed once published to Play, so P12-01 must confirm it before the first upload.
+
+## Open Phase 0 items
+
+| Task | Blocking | Entry |
+|---|---|---|
+| P0-01 | Launch scope confirmation | D-09 |
+| P0-02 | Package pinning beyond SDK | D-01 |
+| P0-03 | Identity provider | not started |
+| P0-04 | Hosting, storage, secrets, budget | D-07 |
+| P0-05 | Vision provider quality and data handling | D-04, D-08 |
+| P0-06 | Label catalog, traditions, source reviewers | D-11 |
+| P0-07 | Retention, save-photo, recovery messaging | not started |
+| P0-08 | Measured quality, latency, cost thresholds | D-05 |
+| P0-09 | Data-protection obligations, legal review | D-08 |
+| P0-10 | Quota timezone, rejected-upload handling | D-10 |
+
+## What has not been done
+
+No code has been run against a vision provider. No recognition quality, latency, or cost has been measured. No vendor has been contracted, no religious source has been reviewed or approved, and no legal review has taken place. Every figure in D-05 is an estimate derived from published rates, not an observation.

@@ -1,0 +1,10 @@
+# Taste
+- Writes requests in Hinglish (Hindi-English mix) and expects responses/reviews in the same style. Confidence: 0.8
+- Wants blunt, honest quality judgment ("pro-level ya normal?") rather than reassurance or a simple pass/fail — asks for an explicit verdict on how professional/production-grade the work is. Confidence: 0.6
+- When asking to "check" (e.g., review a PRD/architecture), wants a read-only review with NO changes made — respects explicit "just check, don't change anything" instructions. Confidence: 0.9
+- Approves proposed next steps with a terse one-word go-ahead (e.g. "go") or a short directive (e.g. "chalo emulator pe") rather than detailed instructions — wants the agent to recommend the next step and then execute it autonomously instead of stalling on confirmation questions. Confidence: 0.8
+- Prefers seeing UI work actually run on a real target (Android emulator/device) and verified visually with screenshots, rather than accepting passing tests/compilation as proof it works. Confidence: 0.5
+- Wants prior-art / competitor validation via a deep web search before building — expects existing apps and services in the space to be hunted down and reported rather than assumed absent. Confidence: 0.6
+- Prefers spinning up many parallel research agents (e.g., ~10) each covering a distinct angle (search demand, store traction, willingness-to-pay, community signals, analogs, failures, reviews) and then a consolidated verdict, for market/demand validation before building. Confidence: 0.7
+- Before committing to a technical/architecture decision (e.g. which storage package to use), asks the agent to first explain the current implementation and the trade-offs ("samjha to tu") rather than answering the decision question straight away. Confidence: 0.5
+- Wants research findings persisted as a proper markdown document in the project (e.g., `docs/demand-research.md`) rather than left only in the chat — research should be saved alongside the other project docs, following their existing style/structure and labelled clearly (e.g., unverified vendor claims marked as such). Confidence: 0.6

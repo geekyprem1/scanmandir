@@ -1,0 +1,60 @@
+# Secrets and credentials — never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+google-services.json
+GoogleService-Info.plist
+**/service-account*.json
+
+# Android signing
+key.properties
+**/android/key.properties
+**/android/app/upload-keystore.jks
+
+# Evaluation photos: real photos of people's homes. Never commit these.
+spike/vision-eval/photos/
+spike/vision-eval/out/
+eval-photos/
+
+# Node
+node_modules/
+npm-debug.log*
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Local development object storage (backend filesystem storage driver)
+backend/.storage/
+backend/.storage-test/
+
+# Flutter and Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+**/build/
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/android/.gradle/
+mobile/android/local.properties
+*.iml
+
+# Generated localization. Produced by `flutter gen-l10n`, which `flutter pub get` also
+# triggers; CI regenerates it explicitly before analysis.
+mobile/lib/l10n/generated/
+# Report of missing translations. Empty means Hindi/English parity is complete.
+mobile/l10n-untranslated.txt
+
+# OS and editors
+Thumbs.db
+desktop.ini
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.json.example

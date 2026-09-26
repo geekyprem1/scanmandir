@@ -1,0 +1,61 @@
+# Local development dependencies only. Not a production deployment descriptor.
+#
+# Production runs managed containers, managed PostgreSQL and private object storage
+# (ARCHITECTURE.md section 14), but the vendor is still an open decision
+# (docs/decisions.md D-07), so nothing here should be treated as the target topology.
+#
+#   docker compose -f infra/docker-compose.yml up -d
+#   docker compose -f infra/docker-compose.yml down          keeps data
+#   docker compose -f infra/docker-compose.yml down -v       deletes data
+
+name: scan-my-mandir-local
+
+services:
+  postgres:
+    image: postgres:18.2-alpine
+    container_name: mandir-postgres
+    restart: unless-stopped
+    environment:
+      # Local development credentials. Deliberately weak and deliberately not secret.
+      POSTGRES_USER: mandir
+      POSTGRES_PASSWORD: mandir_local_dev
+      POSTGRES_DB: mandir
+      # Reproducible ordering and comparison across developer machines and CI.
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C'
+    ports:
+      # Bound to loopback so the database is not reachable from the local network.
+      # 5442 rather than 5432: other projects on this machine already hold the
+      # default port, and this avoids a collision.
+      - '127.0.0.1:5442:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U mandir -d mandir']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # A separate database for integration tests, so a test run cannot destroy
+  # development data.
+  postgres_test:
+    image: postgres:18.2-alpine
+    container_name: mandir-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mandir
+      POSTGRES_PASSWORD: mandir_local_dev
+      POSTGRES_DB: mandir_test
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C'
+    ports:
+      - '127.0.0.1:5443:5432'
+    # No volume: this database is disposable on purpose.
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U mandir -d mandir_test']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres_data:

@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# No workflow secrets are referenced anywhere below. Nothing in this repository needs a
+# credential to build or test: the backend integration tests run against a throwaway
+# service container, and the vision spike is type-checked without ever calling a provider.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18.2-alpine
+        env:
+          POSTGRES_USER: mandir
+          POSTGRES_PASSWORD: mandir_ci
+          POSTGRES_DB: mandir_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mandir -d mandir_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # The local default port does not apply in CI, where the service container is
+      # reachable on 5432.
+      TEST_DATABASE_URL: postgres://mandir:mandir_ci@127.0.0.1:5432/mandir_test
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Types
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Integration tests
+        run: npm run test:integration
+
+  mobile:
+    name: Flutter app
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: subosito/flutter-action@v2
+        with:
+          # Pinned to the version the project is developed and verified against
+          # (docs/decisions.md D-01). Upgrade deliberately.
+          flutter-version: 3.44.8
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Generate localization
+        # Explicit rather than relying on pub get's side effect, because
+        # lib/l10n/generated is not committed.
+        run: flutter gen-l10n
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Tests
+        run: flutter test
+
+      - name: Android debug build
+        # Compiles and packages for Android. Running on a device is separate and cannot
+        # happen here; P11-10 covers real-device validation.
+        run: flutter build apk --debug
+
+  spike:
+    name: Vision spike harness
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: spike/vision-eval
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: spike/vision-eval/package-lock.json
+
+      - run: npm ci
+
+      - name: Types
+        run: npm run typecheck
+
+      - name: Dry run
+        # Exercises the full pipeline against a canned fixture. No API key, no photos,
+        # no provider call, no cost.
+        run: npm run eval:dry

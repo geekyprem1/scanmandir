@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(Get-ChildItem:*)",
+      "Shell(Measure-Object:*)",
+      "Shell(Select-Object:*)",
+      "Shell(Sum/1KB,1:*)",
+      "Shell(}}:*)",
+      "Shell(Test-Path:*)",
+      "powershell"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

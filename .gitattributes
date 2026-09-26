@@ -1,0 +1,23 @@
+# Line endings: LF everywhere.
+#
+# CI runs on Linux and Prettier is configured with endOfLine: lf. Windows checkouts
+# would otherwise rewrite files to CRLF through core.autocrlf and make format:check
+# fail locally on an untouched tree.
+* text=auto eol=lf
+
+# Binaries: never touch the bytes.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.jar binary
+*.apk binary
+*.aab binary
+*.jks binary
+*.keystore binary

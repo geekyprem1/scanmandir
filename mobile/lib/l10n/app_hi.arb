@@ -1,0 +1,149 @@
+{
+  "@@locale": "hi",
+
+  "appTitle": "Scan My Mandir",
+
+  "homeTagline": "अपने मंदिर को समझें, परंपरा के साथ।",
+
+  "homeScanAction": "मंदिर स्कैन करें",
+  "homeUploadAction": "फ़ोटो अपलोड करें",
+  "homeReportsAction": "मेरी रिपोर्ट",
+  "homeMandirProfileAction": "मंदिर प्रोफ़ाइल",
+  "homeSettingsAction": "सेटिंग्स",
+
+  "settingsTitle": "सेटिंग्स",
+  "settingsLanguage": "भाषा",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageHindi": "हिन्दी",
+
+  "settingsBackendStatus": "बैकएंड स्थिति",
+
+  "statusChecking": "जाँच हो रही है…",
+  "statusReachable": "उपलब्ध है",
+  "statusUnreachable": "उपलब्ध नहीं है",
+  "actionRetry": "दोबारा कोशिश करें",
+
+  "disclaimerTitle": "शर्तें और अस्वीकरण",
+  "disclaimerBody": "Scan My Mandir केवल जानकारी और व्यवस्था में सहायता देता है। पारंपरिक मार्गदर्शन परंपरा, क्षेत्र और पारिवारिक रीति के अनुसार भिन्न होता है। यह ऐप किसी योग्य पंडित या किसी पेशेवर सलाह का विकल्प नहीं है, और यह किसी आध्यात्मिक या अलौकिक स्थिति का पता नहीं लगाता।",
+
+  "notImplementedYet": "अभी नहीं बना",
+  "notImplementedDetail": "यह स्क्रीन आगे के चरण का हिस्सा है। यहाँ कुछ भी वास्तविक स्कैन परिणाम नहीं है।",
+
+  "errorUnexpected": "कुछ गड़बड़ हो गई।",
+  "errorNoConnection": "इंटरनेट कनेक्शन नहीं है।",
+  "errorTimeout": "अनुरोध में बहुत समय लगा। दोबारा कोशिश करें।",
+  "errorSessionExpired": "आपका सत्र समाप्त हो गया है। जारी रखने के लिए दोबारा साइन इन करें।",
+  "errorNotPermitted": "इस तक आपकी पहुँच नहीं है।",
+  "errorNotFound": "यह अब उपलब्ध नहीं है।",
+  "errorConflict": "यह कहीं और बदल दिया गया है। इसे दोबारा लोड करके कोशिश करें।",
+  "errorQuotaExceeded": "आपने फ़िलहाल के लिए सभी स्कैन उपयोग कर लिए हैं।",
+  "errorImageUnusable": "इस फ़ोटो का विश्लेषण नहीं हो सकता। नई फ़ोटो लें।",
+  "errorImageExpired": "यह फ़ोटो अब उपलब्ध नहीं है।",
+  "errorAnalysisUnavailable": "विश्लेषण सेवा अभी उपलब्ध नहीं है। थोड़ी देर बाद कोशिश करें।",
+
+  "onboardingLanguageTitle": "अपनी भाषा चुनें",
+
+  "onboardingLanguageDetail": "इसे आप बाद में सेटिंग्स में बदल सकते हैं।",
+
+  "onboardingIntroTitle": "अपने घर के मंदिर को समझें",
+  "onboardingIntroBody": "अपने मंदिर की फ़ोटो लें। Scan My Mandir उसमें दिखने वाली मूर्तियों और वस्तुओं की पहचान करके, स्रोतों के साथ पारंपरिक मार्गदर्शन देता है। मार्गदर्शन केवल जानकारी के लिए है और परंपरा के अनुसार बदलता है।",
+
+  "onboardingPrivacyTitle": "आपकी फ़ोटो, आपकी निजता",
+  "onboardingPrivacyBody": "आपकी फ़ोटो केवल उसमें दिखने वाले मंदिर के विश्लेषण के लिए अपलोड की जाती है, और आपकी स्पष्ट सहमति के बिना उसका उपयोग AI मॉडल के प्रशिक्षण के लिए नहीं किया जाता। आप कभी भी कोई स्कैन, उसकी फ़ोटो, या अपना खाता हटा सकते हैं। कैमरा और गैलरी की अनुमति तभी मांगी जाती है जब आप उनका उपयोग करते हैं।",
+
+  "onboardingNext": "आगे",
+  "onboardingBack": "पीछे",
+  "onboardingStart": "शुरू करें",
+
+  "fixtureNotice": "डेवलपमेंट पूर्वावलोकन, नमूना डेटा के साथ — यह वास्तविक स्कैन परिणाम नहीं है।",
+
+  "scanProgressTitle": "स्कैन प्रगति",
+  "scanStageReceived": "फ़ोटो प्राप्त हुई",
+  "scanStageIdentifying": "दिखने वाली वस्तुओं की पहचान",
+  "scanStageChecking": "व्यवस्था की जाँच",
+
+  "actionContinue": "जारी रखें",
+
+  "detectedItemsTitle": "पहचानी गई वस्तुएँ",
+  "detectedItemsIntro": "देखें कि ऐप क्या पहचान पाया। आगे बढ़ने से पहले ग़लत चीज़ें ठीक करें।",
+  "detectedItemsEmptyTitle": "सूची में कोई वस्तु नहीं",
+  "detectedItemsEmptyDetail": "सब कुछ हटा दिया गया है। फ़ोटो में जो दिखता है उसे जोड़ें।",
+  "detectedItemConfirmed": "पुष्टि की गई",
+  "actionConfirm": "पुष्टि करें",
+  "actionRemove": "हटाएँ",
+  "detectedAddAction": "वस्तु जोड़ें",
+  "detectedAddTitle": "एक वस्तु जोड़ें",
+  "detectedAddFieldLabel": "वस्तु का नाम",
+  "actionAdd": "जोड़ें",
+  "actionCancel": "रद्द करें",
+
+  "fixtureItemLakshmi": "लक्ष्मी मूर्ति",
+  "fixtureItemGanesha": "गणेश जी की तस्वीर",
+  "fixtureItemDiya": "दीया",
+  "fixtureItemIncense": "अगरबत्ती स्टैंड",
+  "fixtureKindIdol": "मूर्ति",
+  "fixtureKindPicture": "तस्वीर",
+  "fixtureKindLamp": "दीपक",
+  "fixtureKindPuja": "पूजा की वस्तु",
+
+  "contextTitle": "कुछ सवाल",
+  "contextIntro": "इन उत्तरों से तय होता है कि कौन-सा पारंपरिक मार्गदर्शन लागू होगा। कोई भी सवाल छोड़ा जा सकता है।",
+  "contextTraditionQuestion": "आपका परिवार कौन-सी परंपरा अपनाता है?",
+  "contextTraditionNorth": "उत्तर भारतीय",
+  "contextTraditionSouth": "दक्षिण भारतीय",
+  "contextTraditionOther": "अन्य",
+  "contextNoSay": "नहीं बताना चाहते",
+  "contextFlameQuestion": "क्या इस मंदिर में खुली लौ (दीया या दीपक) जलाई जाती है?",
+  "contextFlameYes": "हाँ",
+  "contextFlameNo": "नहीं",
+  "contextFlameUnsure": "पता नहीं",
+
+  "viewReportAction": "रिपोर्ट देखें",
+
+  "reportTitle": "रिपोर्ट",
+  "reportComplete": "मंदिर स्कैन पूरा हुआ",
+  "reportItemsDetected": "पहचानी गई वस्तुएँ: {count}",
+  "reportNeedingReview": "ध्यान देने योग्य निष्कर्ष: {count}",
+  "reportNeedingVerify": "सत्यापित करने योग्य निष्कर्ष: {count}",
+  "reportSectionSafety": "सुरक्षा",
+  "reportSectionGood": "ठीक लगता है",
+  "reportSectionReview": "ध्यान दें",
+  "reportSectionVerify": "सत्यापित करें",
+  "reportSourcesTitle": "स्रोत",
+
+  "findingWhatWeSaw": "हमने क्या देखा",
+  "findingWhyFlagged": "यह क्यों चिह्नित हुआ",
+  "findingWhatYouCanDo": "आप क्या कर सकते हैं",
+  "findingUncertainty": "क्या पुष्ट नहीं हो सका",
+  "findingSource": "स्रोत",
+
+  "fixtureGoodTitle": "मंदिर व्यवस्थित दिखता है",
+  "fixtureGoodSaw": "मूर्तियाँ और पूजा की वस्तुएँ साफ़ चौकी पर व्यवस्थित रखी दिखती हैं।",
+  "fixtureReviewTitle": "एक जैसी दो देव प्रतिमाएँ",
+  "fixtureReviewSaw": "दो मिलती-जुलती देव प्रतिमाएँ दिखाई देती हैं।",
+  "fixtureReviewWhy": "कुछ परंपराओं में एक से अधिक प्रतिमाओं को लेकर सीमाएँ या पसंद बताई गई हैं।",
+  "fixtureReviewDo": "अपने परिवार या संप्रदाय में अपनाई जाने वाली परंपरा देखें।",
+  "fixtureSafetyTitle": "दीया ज्वलनशील वस्तु के पास",
+  "fixtureSafetySaw": "दीया कपड़े या कागज़ के पास रखा दिखता है।",
+  "fixtureSafetyWhy": "कपड़े या कागज़ के पास खुली लौ से आग लग सकती है।",
+  "fixtureSafetyDo": "जलते दीये धातु या पत्थर की सतह पर, पर्दों और कागज़ से दूर रखें।",
+  "fixtureVerifyTitle": "मूर्ति की स्थिति पुष्ट नहीं हो सकी",
+  "fixtureVerifySaw": "फ़ोटो में मूर्ति इतनी पास से नहीं दिखती कि उसकी स्थिति का अंदाज़ा हो सके।",
+  "fixtureVerifyWhy": "देखकर की गई जाँच में छोटी क्षति छूट सकती है।",
+  "fixtureVerifyDo": "मूर्ति को स्वयं देखें, या पास से एक और फ़ोटो लें।",
+  "fixtureVerifyUncertainty": "इस फ़ोटो से यह तय नहीं हो सका कि कोई क्षति है या नहीं।",
+
+  "fixtureSource1Title": "घरेलू परंपरा टिप्पणी (नमूना)",
+  "fixtureSource1Edition": "उदाहरण संस्करण, अनुभाग 2",
+  "fixtureSource2Title": "खुली लौ सुरक्षा टिप्पणी (नमूना)",
+  "fixtureSource2Edition": "उदाहरण संस्करण, अनुभाग 5",
+  "fixtureSourceTraditionIllustrative": "उदाहरणात्मक",
+  "fixtureSourceTraditionNotSpecific": "परंपरा-विशिष्ट नहीं",
+  "fixtureSourceReviewer": "समीक्षा नहीं हुई",
+
+  "sourcePlaceholderWarning": "यह डेवलपमेंट नमूना है। अभी किसी भी स्रोत की समीक्षा या स्वीकृति नहीं हुई है।",
+  "sourceFieldTitle": "शीर्षक",
+  "sourceFieldEdition": "संस्करण या अनुभाग",
+  "sourceFieldTradition": "परंपरा",
+  "sourceFieldReviewer": "समीक्षक"
+}
