@@ -249,6 +249,8 @@ Alternatives considered:
 
 Verify before committing: current Supabase Pro limits (database size, storage, egress) and current App Platform BLR pricing. Both change.
 
+Known behaviour when connecting a Node client: the pooler's certificate chain is not in Node's default trust store, so a development connection string needs `?sslmode=no-verify` (still encrypted, identity unverified) or a pinned CA. P11-01 pins Supabase's CA through `NODE_EXTRA_CA_CERTS` and uses `sslmode=verify-full` for deployed environments.
+
 ## Open Phase 0 items
 
 | Task | Blocking | Entry |
