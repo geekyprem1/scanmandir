@@ -39,10 +39,12 @@ export async function appendOutboxEvent(tx: Queryable, input: OutboxEventInput):
  */
 const EVENT_TO_JOB: Record<string, string> = {
   'internal.echo.requested': 'internal.echo',
-  // The analysis handler itself arrives with the vision stage (Phase 5). Until then the
-  // job exists with no handler, which a running worker would fail permanently — and a
-  // client can recover from with the retry endpoint once that lands.
-  'scan.upload_verified': 'scan.analyze',
+  // A verified upload is prepared first: decode, bound, strip metadata, and only then
+  // ask for vision. The analysis handler itself arrives with the vision stage (Phase 5);
+  // until it exists the job is created but has no handler, which a running worker fails
+  // permanently — and the client can recover from with the retry endpoint once that lands.
+  'scan.upload_verified': 'scan.prepare',
+  'scan.prepared': 'scan.analyze',
 };
 
 export interface DispatchResult {

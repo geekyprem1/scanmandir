@@ -245,7 +245,7 @@ describe('scan lifecycle', () => {
 
     const dispatched = await dispatchOutbox(5);
     expect(dispatched.published).toBeGreaterThanOrEqual(1);
-    expect(await countWhere('jobs', 'dedupe_key = $1', [`scan:${scan.id}:analyze:r1`])).toBe(1);
+    expect(await countWhere('jobs', 'dedupe_key = $1', [`scan:${scan.id}:prepare:r1`])).toBe(1);
 
     // Completing twice is a state conflict, not a second analysis.
     const again = await uploadComplete(token, scan.id, upload.stagingKey);

@@ -253,6 +253,18 @@ Known behaviour when connecting a Node client: the pooler's certificate chain is
 
 Storage is live as well: the backend's Supabase driver creates the private `mandir-media` bucket on first use with the configured size and content-type limits, clients upload through short-lived signed URLs rather than through our API, and the backend writes, pins and deletes with the server-only secret key. Tests pin the local driver so they can never touch a real bucket.
 
+## D-17 Derivative contract: what the vision stage is allowed to see
+
+**Proposed.** The worker prepares one derivative per image revision and every analysis stage reads that, never the original upload.
+
+- Long edge bounded to 1024 px (`IMAGE_DERIVATIVE_MAX_EDGE`), JPEG quality 85, never enlarged.
+- The stored original stays pinned and immutable; the derivative is a separate `media_objects` row, so the analysis input is auditable and reproducible per revision.
+- EXIF orientation is applied and metadata is dropped. A photo's GPS coordinates therefore never reach the provider even though the original keeps them (relevant to D-08 and P0-09).
+- Decode budget of 40 megapixels (`IMAGE_MAX_INPUT_PIXELS`). A file beyond it is refused as unusable rather than decoded, so a decompression bomb cannot exhaust worker memory.
+- A file that cannot be decoded is refused before any paid provider call, becomes `needs_retake`, and releases the allowance — the user is not charged for a photo we could not read.
+
+Why this shape: a bounded, upright, metadata-free derivative is what makes per-scan cost predictable and keeps D-08's data minimalization claim true. The open half is quality: 1024 px may be too coarse for small attributes (material, hidden damage, jewellery detail), and the vision evaluation (P0-05, D-04) is what should settle it. Until then it is a working default, not a measured one.
+
 ## Open Phase 0 items
 
 | Task | Blocking | Entry |

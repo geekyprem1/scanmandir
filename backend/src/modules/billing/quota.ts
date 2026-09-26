@@ -89,6 +89,27 @@ export interface ReservationActionInput {
   period: AllowancePeriod;
 }
 
+/**
+ * The period a reservation was taken in.
+ *
+ * A release has to land in the reservation's own period, not in whatever period happens
+ * to be current — a scan created at the end of a month and rejected in the next one
+ * would otherwise release allowance nobody ever spent (docs/decisions.md D-10).
+ */
+export async function findReservationPeriod(
+  db: Queryable,
+  reservationKey: string,
+): Promise<AllowancePeriod | null> {
+  const { rows } = await db.query<{ allowance_period_start: Date; allowance_period_end: Date }>(
+    `SELECT allowance_period_start, allowance_period_end
+       FROM quota_ledger
+      WHERE operation_key = $1 AND kind = 'reserve'`,
+    [reservationKey],
+  );
+  const row = rows[0];
+  return row ? { start: row.allowance_period_start, end: row.allowance_period_end } : null;
+}
+
 /** Releases a reservation: terminal failure or unusable input (ARCHITECTURE.md section 18). */
 export async function releaseAllowance(db: Queryable, input: ReservationActionInput): Promise<void> {
   await db.query(

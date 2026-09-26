@@ -175,3 +175,106 @@ export async function findScanById(db: Queryable = getPool(), scanId: string): P
   const row = rows[0];
   return row ? toScan(row) : null;
 }
+
+export type MediaPurpose = 'original' | 'derivative' | 'thumbnail';
+export type MediaValidationStatus = 'pending' | 'valid' | 'rejected' | 'expired';
+
+export interface MediaObject {
+  id: string;
+  scanId: string;
+  imageRevision: number;
+  purpose: MediaPurpose;
+  storageKey: string;
+  contentType: string | null;
+  byteSize: number | null;
+  validationStatus: MediaValidationStatus;
+}
+
+interface MediaRow {
+  id: string;
+  scan_id: string;
+  image_revision: number;
+  purpose: MediaPurpose;
+  storage_key: string;
+  content_type: string | null;
+  byte_size: string | null;
+  validation_status: MediaValidationStatus;
+}
+
+function toMedia(row: MediaRow): MediaObject {
+  return {
+    id: row.id,
+    scanId: row.scan_id,
+    imageRevision: row.image_revision,
+    purpose: row.purpose,
+    storageKey: row.storage_key,
+    contentType: row.content_type,
+    byteSize: row.byte_size === null ? null : Number(row.byte_size),
+    validationStatus: row.validation_status,
+  };
+}
+
+const SELECT_MEDIA_COLUMNS =
+  'id, scan_id, image_revision, purpose, storage_key, content_type, byte_size, validation_status';
+
+/** The pinned object for one scan, revision and purpose. */
+export async function findMedia(
+  db: Queryable,
+  scanId: string,
+  imageRevision: number,
+  purpose: MediaPurpose,
+): Promise<MediaObject | null> {
+  const { rows } = await db.query<MediaRow>(
+    `SELECT ${SELECT_MEDIA_COLUMNS}
+       FROM media_objects
+      WHERE scan_id = $1 AND image_revision = $2 AND purpose = $3`,
+    [scanId, imageRevision, purpose],
+  );
+  const row = rows[0];
+  return row ? toMedia(row) : null;
+}
+
+export interface RecordDerivativeMediaInput {
+  scanId: string;
+  imageRevision: number;
+  storageKey: string;
+  contentType: string;
+  byteSize: number;
+}
+
+/**
+ * Records the prepared derivative for a revision.
+ *
+ * Upserts rather than inserts, so a redelivered job replaces the row it already wrote
+ * instead of failing on the one-object-per-revision index.
+ */
+export async function recordDerivativeMedia(db: Queryable, input: RecordDerivativeMediaInput): Promise<void> {
+  await db.query(
+    `INSERT INTO media_objects
+        (scan_id, image_revision, purpose, storage_key, content_type, byte_size, validation_status)
+     VALUES ($1, $2, 'derivative', $3, $4, $5, 'valid')
+     ON CONFLICT (scan_id, image_revision, purpose) DO UPDATE
+        SET storage_key = EXCLUDED.storage_key,
+            content_type = EXCLUDED.content_type,
+            byte_size = EXCLUDED.byte_size,
+            validation_status = EXCLUDED.validation_status,
+            updated_at = now()`,
+    [input.scanId, input.imageRevision, input.storageKey, input.contentType, input.byteSize],
+  );
+}
+
+/**
+ * Marks what the server found out about an object. A rejected row is kept rather than
+ * deleted: retention cleanup is the only thing that removes media, so the reason an
+ * upload was refused stays auditable until then.
+ */
+export async function setMediaValidationStatus(
+  db: Queryable,
+  mediaId: string,
+  status: MediaValidationStatus,
+): Promise<void> {
+  await db.query(`UPDATE media_objects SET validation_status = $2, updated_at = now() WHERE id = $1`, [
+    mediaId,
+    status,
+  ]);
+}

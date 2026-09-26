@@ -248,7 +248,9 @@ export async function registerScanRoutes(server: AppServer): Promise<void> {
         eventType: 'scan.upload_verified',
         aggregateType: 'scan',
         aggregateId: scan.id,
-        dedupeKey: `scan:${scan.id}:analyze:r${scan.imageRevision}`,
+        // Named for the stage it causes. The key also becomes the job's dedupe key, so it
+        // has to differ from the analysis job that preparation will enqueue later.
+        dedupeKey: `scan:${scan.id}:prepare:r${scan.imageRevision}`,
         payload: {
           scanId: scan.id,
           userId: caller.id,

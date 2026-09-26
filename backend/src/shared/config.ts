@@ -73,6 +73,15 @@ const EnvSchema = z.object({
     ),
 
   /**
+   * Media preparation. The worker turns the pinned original into the derivative that
+   * every later stage reads: orientation applied, long edge bounded, metadata removed
+   * (ARCHITECTURE.md section 6). Limits live here so a client cannot negotiate them.
+   */
+  IMAGE_DERIVATIVE_MAX_EDGE: z.coerce.number().int().positive().default(1024),
+  IMAGE_MAX_INPUT_PIXELS: z.coerce.number().int().positive().default(40_000_000),
+  IMAGE_DERIVATIVE_QUALITY: z.coerce.number().int().min(1).max(100).default(85),
+
+  /**
    * Scan allowance. Plans and allowances are server configuration, never hard-coded
    * into the client (ARCHITECTURE.md section 18). Period boundaries are resolved in a
    * fixed-offset timezone — Asia/Kolkata by default, which has no DST — and stored on
