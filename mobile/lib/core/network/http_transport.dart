@@ -33,6 +33,24 @@ abstract interface class HttpTransport {
     Map<String, String> headers,
     Duration timeout,
   });
+
+  Future<HttpOutcome> post(
+    Uri uri, {
+    Map<String, String> headers,
+    Object? jsonBody,
+    Duration timeout,
+  });
+
+  /// Uploads bytes to a pre-signed URL.
+  ///
+  /// The URL carries its own authorization and its own constraints, so the headers come
+  /// from the ticket the server issued rather than from the session.
+  Future<HttpOutcome> putBytes(
+    Uri uri, {
+    required List<int> bytes,
+    Map<String, String> headers,
+    Duration timeout,
+  });
 }
 
 /// Raised for transport-level failures. HTTP error statuses are not exceptions: they
@@ -55,20 +73,68 @@ class IoHttpTransport implements HttpTransport {
     Uri uri, {
     Map<String, String> headers = const <String, String>{},
     Duration timeout = const Duration(seconds: 15),
-  }) async {
-    try {
+  }) {
+    return _guard(() async {
       final HttpClientRequest request = await _client
           .getUrl(uri)
           .timeout(timeout);
       headers.forEach(request.headers.set);
-      final HttpClientResponse response = await request.close().timeout(
-        timeout,
-      );
-      final String body = await response
-          .transform(utf8.decoder)
-          .join()
+      return _read(request, timeout);
+    });
+  }
+
+  @override
+  Future<HttpOutcome> post(
+    Uri uri, {
+    Map<String, String> headers = const <String, String>{},
+    Object? jsonBody,
+    Duration timeout = const Duration(seconds: 15),
+  }) {
+    return _guard(() async {
+      final HttpClientRequest request = await _client
+          .postUrl(uri)
           .timeout(timeout);
-      return HttpOutcome(statusCode: response.statusCode, body: body);
+      request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
+      headers.forEach(request.headers.set);
+      if (jsonBody != null) {
+        request.write(jsonEncode(jsonBody));
+      }
+      return _read(request, timeout);
+    });
+  }
+
+  @override
+  Future<HttpOutcome> putBytes(
+    Uri uri, {
+    required List<int> bytes,
+    Map<String, String> headers = const <String, String>{},
+    Duration timeout = const Duration(seconds: 60),
+  }) {
+    return _guard(() async {
+      final HttpClientRequest request = await _client
+          .putUrl(uri)
+          .timeout(timeout);
+      headers.forEach(request.headers.set);
+      request.contentLength = bytes.length;
+      request.add(bytes);
+      return _read(request, timeout);
+    });
+  }
+
+  Future<HttpOutcome> _read(HttpClientRequest request, Duration timeout) async {
+    final HttpClientResponse response = await request.close().timeout(timeout);
+    final String body = await response
+        .transform(utf8.decoder)
+        .join()
+        .timeout(timeout);
+    return HttpOutcome(statusCode: response.statusCode, body: body);
+  }
+
+  /// Turns the platform's network exceptions into the app's failure vocabulary, in one
+  /// place rather than once per verb.
+  Future<HttpOutcome> _guard(Future<HttpOutcome> Function() send) async {
+    try {
+      return await send();
     } on TimeoutException catch (error) {
       throw TransportException(Failure.timeout(debugMessage: error.toString()));
     } on SocketException catch (error) {

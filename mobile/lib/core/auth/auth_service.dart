@@ -24,6 +24,16 @@ abstract interface class AuthService {
 
   /// Creates an anonymous guest session (PRD section 7: the first scan needs no account).
   Future<SessionIdentity> signInAsGuest();
+
+  /// A bearer token for backend calls, or null when there is no session.
+  ///
+  /// Kept out of [SessionIdentity] on purpose: identity is displayed, a credential is
+  /// not. Callers ask for the token at the moment of the call.
+  Future<String?> accessToken();
+
+  /// Refreshes the session and returns a fresh token, or null when there is no session
+  /// or the refresh was refused.
+  Future<String?> refreshedAccessToken();
 }
 
 class SupabaseAuthService implements AuthService {
@@ -51,6 +61,22 @@ class SupabaseAuthService implements AuthService {
       throw const AuthException('Anonymous sign-in returned no user.');
     }
     return SessionIdentity(userId: user.id, isAnonymous: user.isAnonymous);
+  }
+
+  @override
+  Future<String?> accessToken() async =>
+      _client.auth.currentSession?.accessToken;
+
+  @override
+  Future<String?> refreshedAccessToken() async {
+    try {
+      final AuthResponse response = await _client.auth.refreshSession();
+      return response.session?.accessToken;
+    } on AuthException {
+      // A refused refresh means the session is gone, not that the app is broken. The
+      // caller treats a null token as "sign in again".
+      return null;
+    }
   }
 }
 

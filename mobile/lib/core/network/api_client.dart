@@ -1,5 +1,5 @@
 import '../environment.dart';
-import '../model/failure.dart';
+import 'error_mapping.dart';
 import 'http_transport.dart';
 
 class BackendHealth {
@@ -27,7 +27,7 @@ class ApiClient {
   Future<bool> checkAlive() async {
     final HttpOutcome outcome = await _transport.get(_resolve('/health'));
     if (!outcome.isSuccess) {
-      throw TransportException(_failureFrom(outcome));
+      throw TransportException(failureFromOutcome(outcome));
     }
     return outcome.jsonObject?['status'] == 'ok';
   }
@@ -40,7 +40,7 @@ class ApiClient {
     // A 503 here is a valid, informative answer rather than an error: it reports which
     // dependency is down.
     if (body == null) {
-      throw TransportException(_failureFrom(outcome));
+      throw TransportException(failureFromOutcome(outcome));
     }
 
     final Object? rawChecks = body['checks'];
@@ -52,25 +52,5 @@ class ApiClient {
         : const <String, String>{};
 
     return BackendHealth(ready: body['status'] == 'ready', checks: checks);
-  }
-
-  /// Reads the server's stable error code out of the documented envelope.
-  Failure _failureFrom(HttpOutcome outcome) {
-    final Object? error = outcome.jsonObject?['error'];
-    if (error is Map<String, Object?>) {
-      final Object? code = error['code'];
-      if (code is String) {
-        return Failure.fromCode(
-          code,
-          debugMessage: 'HTTP ${outcome.statusCode}',
-        );
-      }
-    }
-    return Failure(
-      kind: outcome.statusCode >= 500
-          ? FailureKind.server
-          : FailureKind.unknown,
-      debugMessage: 'HTTP ${outcome.statusCode}',
-    );
   }
 }
