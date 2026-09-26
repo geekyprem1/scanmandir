@@ -90,7 +90,13 @@ describe('signed storage transfer', () => {
       contentType: 'image/jpeg',
       maxBytes: 1024,
     });
-    const tampered = toInjectable(upload.url).replace(/sig=./, 'sig=X');
+    // Flip the first signature character to one it definitely is not: replacing it with a
+    // fixed character would be a no-op whenever the signature already starts with that
+    // character, which made this test pass or fail depending on the clock.
+    const tampered = toInjectable(upload.url).replace(
+      /sig=(.)/,
+      (_match, first: string) => `sig=${first === 'X' ? 'Y' : 'X'}`,
+    );
 
     const response = await server.inject({
       method: 'PUT',

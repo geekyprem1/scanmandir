@@ -43,6 +43,8 @@ export default defineConfig({
             STORAGE_URL_SECRET: 'integration_test_storage_secret_value',
             // Must agree with the issuer and audience used in test/support/tokens.ts.
             SUPABASE_URL: SUPABASE_TEST_URL,
+            // Small enough that an oversized upload is cheap to construct in a test.
+            UPLOAD_MAX_BYTES: '65536',
           },
         },
       },

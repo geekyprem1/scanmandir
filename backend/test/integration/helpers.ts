@@ -1,4 +1,4 @@
-import { getPool } from '../../src/shared/db/pool.js';
+import { getPool, type QueryParam } from '../../src/shared/db/pool.js';
 
 /** Clears queue state between tests. Never call this against a non-test database. */
 export async function resetQueueTables(): Promise<void> {
@@ -8,6 +8,20 @@ export async function resetQueueTables(): Promise<void> {
 /** Clears identity rows between tests. Never call this against a non-test database. */
 export async function resetIdentityTables(): Promise<void> {
   await getPool().query('TRUNCATE users CASCADE');
+}
+
+/** Clears scans and everything hanging off them. Never call this against a real database. */
+export async function resetScanTables(): Promise<void> {
+  await getPool().query('TRUNCATE scans CASCADE');
+}
+
+/** Reads one column of one table; for assertions that are easier as SQL than as HTTP. */
+export async function countWhere(table: string, where: string, params: QueryParam[]): Promise<number> {
+  const { rows } = await getPool().query<{ count: string }>(
+    `SELECT count(*)::text AS count FROM ${table} WHERE ${where}`,
+    params,
+  );
+  return Number(rows[0]?.count ?? '0');
 }
 
 export async function countRows(table: 'jobs' | 'outbox_events'): Promise<number> {

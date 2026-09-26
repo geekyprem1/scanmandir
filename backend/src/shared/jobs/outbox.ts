@@ -39,6 +39,10 @@ export async function appendOutboxEvent(tx: Queryable, input: OutboxEventInput):
  */
 const EVENT_TO_JOB: Record<string, string> = {
   'internal.echo.requested': 'internal.echo',
+  // The analysis handler itself arrives with the vision stage (Phase 5). Until then the
+  // job exists with no handler, which a running worker would fail permanently — and a
+  // client can recover from with the retry endpoint once that lands.
+  'scan.upload_verified': 'scan.analyze',
 };
 
 export interface DispatchResult {

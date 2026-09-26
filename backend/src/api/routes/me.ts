@@ -1,8 +1,7 @@
-import type { FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { findUserById, updateProfile, type AppUser } from '../../modules/identity/user_repository.js';
 import { AppError, ERROR_CODES } from '../../shared/errors.js';
-import type { AuthenticatedUser } from '../plugins/auth.js';
+import { requireCaller } from '../plugins/auth.js';
 import type { AppServer } from '../types.js';
 
 /**
@@ -20,15 +19,6 @@ function profileBody(user: AppUser): Record<string, unknown> {
 
 /** Rejects unknown keys on purpose: a silently ignored typo is worse than a 400. */
 const PatchProfileSchema = z.object({ language: z.enum(['en', 'hi']) }).strict();
-
-/** The guard ran, so this cannot be absent — a missing caller is a wiring bug. */
-function requireCaller(request: FastifyRequest): AuthenticatedUser {
-  const caller = request.user;
-  if (!caller) {
-    throw new AppError(ERROR_CODES.INTERNAL, 'Request identity was not established.');
-  }
-  return caller;
-}
 
 export async function registerMeRoutes(server: AppServer): Promise<void> {
   server.get('/v1/me', { preHandler: server.authenticate }, async (request) => {

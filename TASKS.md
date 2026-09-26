@@ -1,6 +1,6 @@
 # Scan My Mandir — Implementation Tasks
 
-**Version:** 1.17  
+**Version:** 1.18  
 **Updated:** 26 September 2026  
 **Stack:** Flutter/Dart, TypeScript/Fastify, PostgreSQL, private object storage  
 **Release target:** Android first; iOS later
@@ -35,6 +35,7 @@
 - [x] BUILD-10 — P3-01 server half verified against the live Supabase project (Mumbai). A real anonymous session, created through the project's own auth endpoint, produced a token that `GET /me` accepted — same user id, `isAnonymous: true` — while missing tokens and tokens from unknown keys stay 401 in the documented error shape.
 - [x] BUILD-11 — P3-01 app half verified on the emulator. A guest session created against the live project persisted through keystore-backed storage and came back with the same user id after a force-stop and relaunch; the session starts on demand, not at launch. 56 Flutter tests pass and `flutter analyze` is clean.
 - [x] BUILD-12 — P3-04/P3-05 foundation: `users` migration, internal-user resolution in the auth guard, and `GET`/`PATCH /v1/me`. Live-verified against the Mumbai project — a real guest token produced a profile whose wire id is an internal UUID distinct from the provider subject, and a language change persisted across requests. Backend is now 74 tests (34 unit, 40 integration) and `npm run check` is clean.
+- [x] BUILD-13 — Phase 4 started, scan-lifecycle backend: `scans`, `media_objects` and `quota_ledger` migrations, idempotent scan creation with allowance reservation, constrained signed upload URLs, upload completion with pinning and an atomic outbox event, and scan state reads. Live-verified end to end — a real guest token created a scan, uploaded a PNG through the signed URL, and the scan reached `queued` with the pinned object on disk. Backend is now 87 tests (38 unit, 49 integration); a clock-dependent flake in the dev-storage signature test was also fixed.
 
 ## Milestones and dependencies
 
@@ -138,10 +139,10 @@
 
 - [ ] P4-01 — Implement camera capture, selected-photo gallery import, preview, crop, retake, and continue.
 - [ ] P4-02 — Handle permissions at point of use; preserve gallery fallback if camera permission is denied.
-- [ ] P4-03 — Implement idempotent scan creation and quota reservation before provider work.
-- [ ] P4-04 — Implement constrained signed upload URLs, upload completion, actual-image validation, decode limits, normalization, and metadata removal.
-- [ ] P4-05 — Implement scan states from architecture, including `needs_retake`, failed-stage tracking, input revisions, and terminal deletion.
-- [ ] P4-06 — Atomically write state and outbox event; implement worker leases, job deduplication, bounded retries, and abandoned-job reconciliation.
+- [x] P4-03 — Implement idempotent scan creation and quota reservation before provider work. `POST /v1/scans` creates the scan and reserves allowance in one transaction: replaying an idempotency key returns the same scan, reusing it with different input is a conflict, concurrent retries that race the unique index resolve as replays, and a fourth scan in a period is refused with `QUOTA_EXCEEDED` leaving no scan or reservation behind. Allowance (three per calendar month) and the period offset are server configuration, never client input, and the resolved period is stored on every ledger entry (D-10). Covered by `backend/test/integration/scans.test.ts` and `backend/test/unit/quota_period.test.ts`.
+- [ ] P4-04 — Implement constrained signed upload URLs, upload completion, actual-image validation, decode limits, normalization, and metadata removal. *Partly done: the issue-and-complete half is built. `POST /v1/scans/{id}/upload-url` returns a short-lived signed URL scoped to a per-attempt staging key, one allowed content type and the configured size limit; `upload-complete` re-checks that the key belongs to this scan, verifies the stored object's size and type, pins an immutable copy at the canonical key, deletes the staging object, records the media row with `validation_status = valid`, and queues analysis. Live-verified end to end (BUILD-13). Remaining and deliberately not faked: decode limits, orientation, normalization and metadata removal need a real image decoder, which arrives with the worker's prepare stage.*
+- [ ] P4-05 — Implement scan states from architecture, including `needs_retake`, failed-stage tracking, input revisions, and terminal deletion. *Partly done: the state set exists as a database constraint and as the wire contract (`status`, `nextAction`), `failed_stage` is carried, and deletion is a terminal timestamp that takes precedence over workers. `awaiting_upload → queued` is implemented; the states only the vision stage can enter — `analyzing`, `needs_retake`, `failed` — arrive with Phase 5, along with revision increments for retake.*
+- [x] P4-06 — Atomically write state and outbox event; implement worker leases, job deduplication, bounded retries, and abandoned-job reconciliation. Upload completion writes the state change and its outbox event in one transaction, and the dispatcher turns the event into a deduplicated `scan.analyze` job (dedupe key `scan:{id}:analyze:r{revision}`). Leases, bounded retry, deduplication and abandoned-lease recovery came with Phase 1. The analysis handler itself is Phase 5; until it exists a running worker would fail the job permanently, which the retry endpoint will recover from once it lands.
 - [ ] P4-07 — Persist upload/scan progress; reconcile on foreground/app restart and use OS-backed transfer scheduling where supported.
 - [ ] P4-08 — Implement progress polling with bounded backoff and meaningful server stages.
 - [ ] P4-09 — Release reservations on unusable input/terminal failure; ensure repeated requests do not reserve or consume twice.

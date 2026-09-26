@@ -42,6 +42,34 @@ const EnvSchema = z.object({
   SUPABASE_JWT_AUDIENCE: z.string().min(1).default('authenticated'),
   /** Defaults to <SUPABASE_URL>/auth/v1. */
   SUPABASE_JWT_ISSUER: z.string().url().optional(),
+
+  /**
+   * Upload constraints. They live here, not in the client, so a signed URL cannot be
+   * negotiated upward (ARCHITECTURE.md section 6).
+   */
+  UPLOAD_MAX_BYTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(12 * 1024 * 1024),
+  UPLOAD_ALLOWED_CONTENT_TYPES: z
+    .string()
+    .default('image/jpeg,image/png,image/webp')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((entry) => entry.trim().toLowerCase())
+        .filter((entry) => entry.length > 0),
+    ),
+
+  /**
+   * Scan allowance. Plans and allowances are server configuration, never hard-coded
+   * into the client (ARCHITECTURE.md section 18). Period boundaries are resolved in a
+   * fixed-offset timezone — Asia/Kolkata by default, which has no DST — and stored on
+   * every ledger entry (docs/decisions.md D-10).
+   */
+  SCAN_FREE_ALLOWANCE_PER_PERIOD: z.coerce.number().int().nonnegative().default(3),
+  QUOTA_PERIOD_OFFSET_MINUTES: z.coerce.number().int().min(-720).max(840).default(330),
 });
 
 export type AppConfig = z.infer<typeof EnvSchema> & {

@@ -8,6 +8,7 @@ import { registerAuth } from './plugins/auth.js';
 import { registerHealthRoutes } from './routes/health.js';
 import { registerDevStorageRoutes } from './routes/dev-storage.js';
 import { registerMeRoutes } from './routes/me.js';
+import { registerScanRoutes } from './routes/scans.js';
 import type { AppServer } from './types.js';
 
 export interface BuildServerOptions {
@@ -70,6 +71,7 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<App
   await registerAuth(server, { keyResolver: options.authKeyResolver });
   await registerHealthRoutes(server);
   await registerMeRoutes(server);
+  await registerScanRoutes(server);
 
   if (!config.isProduction) {
     await registerDevStorageRoutes(server);

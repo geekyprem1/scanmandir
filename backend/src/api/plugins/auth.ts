@@ -40,6 +40,20 @@ export interface AuthPluginOptions {
 }
 
 /**
+ * The caller established by [FastifyInstance.authenticate].
+ *
+ * The guard ran, so this cannot be absent on a guarded route — a missing caller is a
+ * wiring bug, not a client error.
+ */
+export function requireCaller(request: FastifyRequest): AuthenticatedUser {
+  const caller = request.user;
+  if (!caller) {
+    throw new AppError(ERROR_CODES.INTERNAL, 'Request identity was not established.');
+  }
+  return caller;
+}
+
+/**
  * Registers session verification. Routes opt in per route:
  *
  *   server.get('/v1/me', { preHandler: server.authenticate }, handler)
