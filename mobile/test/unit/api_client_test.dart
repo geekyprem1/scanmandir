@@ -65,6 +65,8 @@ void main() {
       environment: Environment(
         flavor: AppFlavor.development,
         apiBaseUrl: Uri.parse('http://10.0.2.2:3000'),
+        supabaseUrl: Uri.parse('https://test-project.supabase.co'),
+        supabasePublishableKey: 'sb_publishable_test_key',
       ),
       transport: FakeHttpTransport(),
     );

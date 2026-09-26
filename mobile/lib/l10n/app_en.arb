@@ -26,6 +26,17 @@
   "settingsLanguageEnglish": "English",
   "settingsLanguageHindi": "हिन्दी",
 
+  "settingsSession": "Session",
+  "sessionSignedOut": "No session yet. A guest session is created when you first scan.",
+  "sessionStarting": "Starting a session…",
+  "sessionStartAction": "Start guest session",
+  "sessionGuest": "Guest session",
+  "sessionSignedIn": "Signed in",
+  "sessionGuestNotice": "Reinstalling the app or clearing its data can lose access to this history.",
+  "@sessionGuestNotice": {
+    "description": "PRD section 7: guests must be told that losing the session can lose their history."
+  },
+
   "settingsBackendStatus": "Backend status",
   "@settingsBackendStatus": {
     "description": "Developer-facing connectivity check, not a user feature."

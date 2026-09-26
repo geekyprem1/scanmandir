@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/auth/auth_service.dart';
+import '../../../core/auth/session_controller.dart';
 import '../../../core/designsystem/app_theme.dart';
 import '../../../core/designsystem/app_widgets.dart';
+import '../../../core/designsystem/failure_view.dart';
 import '../../../core/environment.dart';
 import '../../../core/model/failure.dart';
 import '../../../core/model/ui_state.dart';
@@ -61,6 +64,8 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => context.push('/disclaimer'),
             ),
             const Divider(height: Insets.xl),
+            const _SessionTile(),
+            const Divider(height: Insets.xl),
             const _BackendStatusTile(),
           ],
         ),
@@ -72,6 +77,69 @@ class SettingsScreen extends ConsumerWidget {
     if (value != null) {
       ref.read(localeControllerProvider.notifier).select(value);
     }
+  }
+}
+
+/// The user's identity state.
+///
+/// A guest session is created on demand for the first scan (PRD section 7), so this
+/// tile is also the place to start one before scanning exists. The guest notice is the
+/// PRD's requirement that losing the session can mean losing history.
+class _SessionTile extends ConsumerWidget {
+  const _SessionTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final SessionUiState state = ref.watch(sessionControllerProvider);
+
+    void startSession() =>
+        ref.read(sessionControllerProvider.notifier).startGuestSession();
+
+    final Widget trailing = switch (state) {
+      SessionSignedOut() => TextButton(
+        onPressed: startSession,
+        child: Text(l10n.sessionStartAction),
+      ),
+      SessionStarting() => SizedBox(
+        width: 18,
+        height: 18,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          semanticsLabel: l10n.sessionStarting,
+        ),
+      ),
+      SessionSignedIn(:final SessionIdentity identity) => StatusChip(
+        label: identity.isAnonymous ? l10n.sessionGuest : l10n.sessionSignedIn,
+        tone: StatusTone.good,
+      ),
+      SessionFailed() => TextButton(
+        onPressed: startSession,
+        child: Text(l10n.actionRetry),
+      ),
+    };
+
+    final String subtitle = switch (state) {
+      SessionSignedOut() => l10n.sessionSignedOut,
+      SessionStarting() => l10n.sessionStarting,
+      SessionSignedIn(:final SessionIdentity identity) => <String>[
+        l10n.sessionGuestNotice,
+        // Diagnostic only, as with the backend tile; the id is not user-facing copy.
+        identity.userId,
+      ].join('\n'),
+      SessionFailed(:final Failure failure) => FailureView.messageFor(
+        l10n,
+        failure.kind,
+      ),
+    };
+
+    return ListTile(
+      leading: const Icon(Icons.person_outline),
+      title: Text(l10n.settingsSession),
+      subtitle: Text(subtitle),
+      isThreeLine: state is SessionSignedIn,
+      trailing: trailing,
+    );
   }
 }
 

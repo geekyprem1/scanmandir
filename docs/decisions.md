@@ -168,10 +168,12 @@ Pinned exactly rather than with caret ranges, so builds are reproducible across 
 | `flutter_riverpod` | 3.4.3 | One state-management approach throughout, per architecture section 4. Chosen over Bloc for less ceremony per controller, and over plain `ChangeNotifier` because the scan lifecycle involves dependent async state where provider overrides make testing straightforward. |
 | `go_router` | 17.5.0 | Declarative routing. The scan journey is a sequence of routes rather than states inside one widget, so Android back behaviour and process death stay predictable. |
 | `intl` | 0.20.2 | Pinned to what `flutter_localizations` requires under Flutter 3.44.8. A newer 0.20.3 exists but does not resolve. |
+| `flutter_secure_storage` | 11.2.0 | Keystore-backed storage behind the existing `SecureCredentialStore` interface. Session tokens must never reach shared preferences or the SQLite cache (architecture section 4), and the Supabase session plus its PKCE verifier are redirected here. |
+| `supabase_flutter` | 2.17.2 | The identity client decided in D-15. Initialized with the project URL and publishable key only; the service-role key never ships in the app. |
 
 Localization uses the SDK's own `gen_l10n` with `.arb` files rather than a third-party package.
 
-Still open: HTTP client package, SQLite, secure credential storage, camera/gallery, and sensors. Phase 1 uses `dart:io` behind a transport interface, so adopting a package later cannot reach feature code. Interfaces for the platform capabilities already exist in `mobile/lib/core/platform/` with no implementations behind them.
+Still open: HTTP client package, SQLite, camera/gallery, and sensors. Phase 1 uses `dart:io` behind a transport interface, so adopting a package later cannot reach feature code. Interfaces for the remaining platform capabilities already exist in `mobile/lib/core/platform/`; `SecureCredentialStore` is the first of them with an implementation behind it.
 
 Newer major versions exist for some of these — `go_router` 18, for example. Upgrade deliberately, not incidentally.
 

@@ -1,6 +1,6 @@
 # Scan My Mandir — Implementation Tasks
 
-**Version:** 1.15  
+**Version:** 1.16  
 **Updated:** 26 September 2026  
 **Stack:** Flutter/Dart, TypeScript/Fastify, PostgreSQL, private object storage  
 **Release target:** Android first; iOS later
@@ -33,6 +33,7 @@
 - [x] BUILD-08 — Version control and CI are live. The initial commit `9de6df1` (193 files) was pushed to `github.com/geekyprem1/scanmandir`, and the push ran all three CI jobs green on the first attempt. `.gitattributes` pins LF so Windows checkouts cannot break `format:check`.
 - [x] BUILD-09 — Phase 3 started. P3-01 server half: Supabase JWT verification against the project's JWKS with an authenticated `GET /me`; the backend is now 71 tests (34 unit, 37 integration against real PostgreSQL) and `npm run check` is clean.
 - [x] BUILD-10 — P3-01 server half verified against the live Supabase project (Mumbai). A real anonymous session, created through the project's own auth endpoint, produced a token that `GET /me` accepted — same user id, `isAnonymous: true` — while missing tokens and tokens from unknown keys stay 401 in the documented error shape.
+- [x] BUILD-11 — P3-01 app half verified on the emulator. A guest session created against the live project persisted through keystore-backed storage and came back with the same user id after a force-stop and relaunch; the session starts on demand, not at launch. 56 Flutter tests pass and `flutter analyze` is clean.
 
 ## Milestones and dependencies
 
@@ -57,7 +58,7 @@
 ## Phase 0 — Resolve implementation choices
 
 - [ ] P0-01 — Confirm Android-first launch scope. Compass and billing are currently included in the public MVP; update PRD and architecture together if explicitly deferred.
-- [ ] P0-02 — Select and pin Flutter/Dart SDK, one state-management approach, navigation, HTTP, SQLite, secure-storage, camera/gallery, and sensor integrations after checking maintained platform support. *Partly done: SDK, state management, navigation and localization are pinned in `docs/decisions.md` D-01 and D-12. SQLite, secure storage, camera/gallery and sensors are still unchosen; interfaces for them exist in `mobile/lib/core/platform/` with no implementations.*
+- [ ] P0-02 — Select and pin Flutter/Dart SDK, one state-management approach, navigation, HTTP, SQLite, secure-storage, camera/gallery, and sensor integrations after checking maintained platform support. *Partly done: SDK, state management, navigation, localization (D-01, D-12), secure storage and the Supabase client (D-12, D-15) are pinned. SQLite, camera/gallery and sensors are still unchosen; interfaces for them exist in `mobile/lib/core/platform/` with no implementations behind them.*
 - [x] P0-03 — Choose managed identity provider and guest-to-account upgrade methods. Decided: **Supabase Auth** (`docs/decisions.md` D-15) — anonymous guests are first-class and upgrade in place, so guest history survives; Google Sign-In and email magic link at MVP; phone OTP deferred behind TRAI DLT registration. Confirmed 26 September 2026.
 - [ ] P0-04 — Choose hosting region, PostgreSQL hosting, object storage, and secret management; record operating budget. *Supabase confirmed for PostgreSQL, Auth and object storage in Mumbai (D-15/D-16). Still proposed: the container host — DigitalOcean App Platform in Bangalore — which needs confirmation before provisioning; a production Dockerfile is the missing prerequisite. Budget ≈ $35–40/month fixed before domain and Play fees.*
 - [ ] P0-05 — Evaluate vision providers using representative mandir photos; record quality, latency, cost, structured-output support, and data retention. *Harness built and dry-run verified at `spike/vision-eval/`. Blocked on real photos and an API key. Published-rate cost estimate recorded in `docs/decisions.md` D-05; no quality, latency or cost has been measured.*
@@ -121,7 +122,7 @@
 
 ## Phase 3 — Identity, ownership, and persistence
 
-- [ ] P3-01 — Integrate anonymous identity sessions and server token verification. *Partly done: the server half is built, tested and now verified against the live project. Supabase access tokens are verified locally against the project's JWKS — asymmetric algorithms only, with the symmetric algorithm refused outright — every failure is UNAUTHENTICATED in the documented error shape, and an authenticated `GET /me` returns the caller's id and guest status. Tests inject a local key set (`backend/test/support/tokens.ts`), so the suite needs no live project; a real anonymous session from the Mumbai project was additionally accepted by `GET /me` with the same user id and `isAnonymous: true` (BUILD-10). Remaining: the app-side session — `supabase_flutter` plus the secure-storage choice still open at P0-02.*
+- [x] P3-01 — Integrate anonymous identity sessions and server token verification. Server: Supabase access tokens are verified locally against the project's JWKS — asymmetric algorithms only, with the symmetric algorithm refused outright — every failure is UNAUTHENTICATED in the documented error shape, and `GET /me` returns the caller's id and guest status; live-verified against the Mumbai project (BUILD-10). App: `supabase_flutter` 2.17.2 initializes with the project URL and publishable key only, and the session and its PKCE verifier persist through `flutter_secure_storage` 11.2.0 behind the existing `SecureCredentialStore` boundary — never shared preferences (ARCHITECTURE.md section 4). A guest session starts on demand rather than at launch, and the Settings tile shows its state with the PRD section 7 warning; on the emulator the session survived a force-stop and relaunch with the same user id (BUILD-11).
 - [ ] P3-02 — Implement account upgrade/linking without losing guest history or merging unverified identities.
 - [ ] P3-03 — Add migrations for users, mandirs, scans, media, observations, confirmed items, context, reports, findings, sources, rule versions, jobs/outbox, quota ledger, entitlements, feedback, deletion requests, and audit events. *Jobs and outbox are done in `0001_job_infrastructure.sql`. Every domain table is still outstanding and deliberately waits on P0-06.*
 - [ ] P3-04 — Enforce user ownership for every scan, image, mandir, finding, and report endpoint.

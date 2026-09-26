@@ -16,6 +16,14 @@
   "settingsLanguageEnglish": "English",
   "settingsLanguageHindi": "हिन्दी",
 
+  "settingsSession": "सत्र",
+  "sessionSignedOut": "अभी कोई सत्र नहीं। पहले स्कैन पर अतिथि सत्र बन जाता है।",
+  "sessionStarting": "सत्र शुरू हो रहा है…",
+  "sessionStartAction": "अतिथि सत्र शुरू करें",
+  "sessionGuest": "अतिथि सत्र",
+  "sessionSignedIn": "साइन इन हैं",
+  "sessionGuestNotice": "ऐप दोबारा इंस्टॉल करने या उसका डेटा हटाने पर इस इतिहास तक पहुँच खो सकती है।",
+
   "settingsBackendStatus": "बैकएंड स्थिति",
 
   "statusChecking": "जाँच हो रही है…",

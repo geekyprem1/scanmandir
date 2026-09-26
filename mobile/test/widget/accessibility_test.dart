@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scan_my_mandir/app/app.dart';
+import 'package:scan_my_mandir/core/auth/session_controller.dart';
 import 'package:scan_my_mandir/core/designsystem/app_widgets.dart';
 import 'package:scan_my_mandir/core/providers.dart';
 import 'package:scan_my_mandir/features/home/presentation/home_screen.dart';
@@ -11,6 +12,7 @@ import 'package:scan_my_mandir/features/scan/presentation/context_questions_scre
 import 'package:scan_my_mandir/features/scan/presentation/detected_items_screen.dart';
 import 'package:scan_my_mandir/features/scan/presentation/scan_progress_screen.dart';
 
+import '../support/fake_auth_service.dart';
 import '../support/fake_http_transport.dart';
 
 /// P2-07: system back navigation, app resume, large system text, and semantic labels.
@@ -29,6 +31,8 @@ Future<void> pumpApp(WidgetTester tester, {bool firstLaunch = false}) async {
         httpTransportProvider.overrideWithValue(FakeHttpTransport()),
         if (!firstLaunch)
           onboardingCompletedProvider.overrideWith(_CompletedOnboarding.new),
+        // Settings renders the session tile; tests must not reach for Supabase.
+        authServiceProvider.overrideWithValue(FakeAuthService()),
       ],
       child: const ScanMyMandirApp(),
     ),

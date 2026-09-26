@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scan_my_mandir/app/app.dart';
+import 'package:scan_my_mandir/core/auth/session_controller.dart';
 import 'package:scan_my_mandir/core/environment.dart';
 import 'package:scan_my_mandir/core/model/failure.dart';
 import 'package:scan_my_mandir/core/network/http_transport.dart';
 import 'package:scan_my_mandir/core/providers.dart';
 import 'package:scan_my_mandir/features/onboarding/application/onboarding_controller.dart';
 
+import '../support/fake_auth_service.dart';
 import '../support/fake_http_transport.dart';
 
 /// These tests exercise the app past onboarding; the flow itself is covered in
@@ -32,6 +34,8 @@ Future<void> pumpApp(
           transport ?? FakeHttpTransport(),
         ),
         onboardingCompletedProvider.overrideWith(_CompletedOnboarding.new),
+        // Settings renders the session tile; tests must not reach for Supabase.
+        authServiceProvider.overrideWithValue(FakeAuthService()),
       ],
       child: const ScanMyMandirApp(),
     ),

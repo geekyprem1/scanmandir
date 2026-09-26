@@ -62,5 +62,8 @@ Environment testEnvironment({AppFlavor flavor = AppFlavor.development}) {
   return Environment(
     flavor: flavor,
     apiBaseUrl: Uri.parse('http://127.0.0.1:3000'),
+    // Stand-in values; tests never reach the real project (auth is faked).
+    supabaseUrl: Uri.parse('https://test-project.supabase.co'),
+    supabasePublishableKey: 'sb_publishable_test_key',
   );
 }

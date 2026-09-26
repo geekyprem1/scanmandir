@@ -21,10 +21,17 @@ dependencies:
   # State management (docs/decisions.md D-12). One approach throughout: controllers
   # expose immutable state, widgets read it.
   flutter_riverpod: 3.4.3
+  # Keystore-backed credential storage. Session tokens must never reach shared
+  # preferences or the SQLite cache (ARCHITECTURE.md section 4), so the Supabase session
+  # and its PKCE verifier are persisted here (docs/decisions.md D-12).
+  flutter_secure_storage: 11.2.0
   # Declarative routing, so the scan flow's states map onto routes predictably.
   go_router: 17.5.0
   # Pinned to what flutter_localizations requires in this Flutter version.
   intl: 0.20.2
+  # Identity: anonymous guest sessions upgraded in place (docs/decisions.md D-15). The
+  # app ships only the publishable key; authorization is enforced by the server.
+  supabase_flutter: 2.17.2
 
 dev_dependencies:
   flutter_lints: 6.0.0
