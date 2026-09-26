@@ -251,6 +251,8 @@ Verify before committing: current Supabase Pro limits (database size, storage, e
 
 Known behaviour when connecting a Node client: the pooler's certificate chain is not in Node's default trust store, so a development connection string needs `?sslmode=no-verify` (still encrypted, identity unverified) or a pinned CA. P11-01 pins Supabase's CA through `NODE_EXTRA_CA_CERTS` and uses `sslmode=verify-full` for deployed environments.
 
+Storage is live as well: the backend's Supabase driver creates the private `mandir-media` bucket on first use with the configured size and content-type limits, clients upload through short-lived signed URLs rather than through our API, and the backend writes, pins and deletes with the server-only secret key. Tests pin the local driver so they can never touch a real bucket.
+
 ## Open Phase 0 items
 
 | Task | Blocking | Entry |

@@ -1,6 +1,6 @@
 # Scan My Mandir — Implementation Tasks
 
-**Version:** 1.19  
+**Version:** 1.20  
 **Updated:** 26 September 2026  
 **Stack:** Flutter/Dart, TypeScript/Fastify, PostgreSQL, private object storage  
 **Release target:** Android first; iOS later
@@ -37,6 +37,7 @@
 - [x] BUILD-12 — P3-04/P3-05 foundation: `users` migration, internal-user resolution in the auth guard, and `GET`/`PATCH /v1/me`. Live-verified against the Mumbai project — a real guest token produced a profile whose wire id is an internal UUID distinct from the provider subject, and a language change persisted across requests. Backend is now 74 tests (34 unit, 40 integration) and `npm run check` is clean.
 - [x] BUILD-13 — Phase 4 started, scan-lifecycle backend: `scans`, `media_objects` and `quota_ledger` migrations, idempotent scan creation with allowance reservation, constrained signed upload URLs, upload completion with pinning and an atomic outbox event, and scan state reads. Live-verified end to end — a real guest token created a scan, uploaded a PNG through the signed URL, and the scan reached `queued` with the pinned object on disk. Backend is now 87 tests (38 unit, 49 integration); a clock-dependent flake in the dev-storage signature test was also fixed.
 - [x] BUILD-14 — The API now runs against the Supabase Postgres (Mumbai, session pooler). The hand-applied schema was reconciled: the runner registered the four migrations and reports `alreadyApplied: 4`, every table in `public` has row level security, and a live smoke test created a scan, uploaded a PNG through the signed URL and ended `queued` — with the scan, ledger, media and outbox rows verifiably in Supabase and zero rows in the old local database. Integration tests keep their own throwaway database on 5443; 87 tests pass.
+- [x] BUILD-15 — Media now lives in Supabase Storage. `STORAGE_DRIVER=supabase` moves the object-storage interface onto the project's private bucket (`mandir-media`), created on first use with the configured 12 MB limit and jpeg/png/webp allow-list, so Storage itself rejects an oversized or mistyped upload. Live-verified: the API issued a Supabase signed upload URL, the client uploaded straight to Storage, and `upload-complete` verified, pinned and returned `queued` — the bucket lists exactly one `r1/original` object (70 bytes, `image/png`) with the staging copy gone. Both vitest projects pin `STORAGE_DRIVER=local`, so a development `.env` pointing at real services can never let the suite write to a real bucket. Backend is 99 tests.
 
 ## Milestones and dependencies
 

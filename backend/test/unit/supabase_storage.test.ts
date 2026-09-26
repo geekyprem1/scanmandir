@@ -158,6 +158,18 @@ describe('Supabase storage driver', () => {
     await expect(failing.storage.deleteObject('scans/u/s/r1/original')).rejects.toThrow(/500/);
   });
 
+  it('treats a missing bucket as no object, so a readiness probe passes on a fresh project', async () => {
+    // Storage answers 400 "Bucket not found" until the first upload creates the bucket.
+    const { storage } = createStorage(
+      () =>
+        new Response(JSON.stringify({ statusCode: '400', error: 'Bucket not found' }), {
+          status: 400,
+        }),
+    );
+
+    await expect(storage.headObject('healthcheck/probe')).resolves.toBeNull();
+  });
+
   it('refuses an unsafe key before making any request', async () => {
     const { storage, requests } = createStorage(() => new Response(null, { status: 200 }));
 

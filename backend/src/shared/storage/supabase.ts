@@ -178,7 +178,10 @@ export class SupabaseObjectStorage implements ObjectStorage {
     assertSafeObjectKey(key);
 
     const response = await this.request('HEAD', `/object/authenticated/${this.bucket}/${key}`);
-    if (response.status === 404) {
+    // 404 is a missing object; 400 is a missing bucket. Both mean the same thing here —
+    // the object does not exist — and an object cannot exist without its bucket, so a
+    // readiness probe on a fresh project must not report the storage as broken.
+    if (response.status === 404 || response.status === 400) {
       return null;
     }
     if (!response.ok) {

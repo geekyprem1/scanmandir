@@ -21,6 +21,8 @@ export default defineConfig({
             NODE_ENV: 'test',
             // Never connected to by unit tests; config validation only requires it to exist.
             DATABASE_URL: 'postgres://unit-tests-do-not-connect',
+            // Pinned so a development .env pointing at real services cannot leak in.
+            STORAGE_DRIVER: 'local',
             // Verification in tests uses a local key set; this only satisfies config.
             SUPABASE_URL: SUPABASE_TEST_URL,
             // Storage stays on the local driver in tests; the value only satisfies the
@@ -42,11 +44,14 @@ export default defineConfig({
           env: {
             NODE_ENV: 'test',
             DATABASE_URL: TEST_DATABASE_URL,
+            // Pinned: the suite writes and deletes objects, and a development .env that
+            // points at real services must never let it touch a real bucket.
+            STORAGE_DRIVER: 'local',
             STORAGE_LOCAL_DIR: '.storage-test',
             STORAGE_URL_SECRET: 'integration_test_storage_secret_value',
             // Must agree with the issuer and audience used in test/support/tokens.ts.
             SUPABASE_URL: SUPABASE_TEST_URL,
-            // Storage stays on the local driver here.
+            // Present so config never demands it here; the driver is not selected.
             SUPABASE_SERVICE_KEY: 'sb_secret_integration_tests',
             // Small enough that an oversized upload is cheap to construct in a test.
             UPLOAD_MAX_BYTES: '65536',
