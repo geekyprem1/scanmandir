@@ -116,14 +116,16 @@ String labelDisplayName(AppLocalizations l10n, String label) => switch (label) {
 };
 
 /// How the object is represented, which matters for the duplicate rules (PRD section 13).
-String representationDisplayName(AppLocalizations l10n, String representation) =>
-    switch (representation) {
-      'statue' => l10n.representationStatue,
-      'framed_image' => l10n.representationFramedImage,
-      'poster' => l10n.representationPoster,
-      'printed_image' => l10n.representationPrintedImage,
-      'relief' => l10n.representationRelief,
-      'shivling' => l10n.representationShivling,
-      'physical_object' => l10n.representationPhysicalObject,
-      _ => l10n.representationUnknown,
-    };
+String representationDisplayName(
+  AppLocalizations l10n,
+  String representation,
+) => switch (representation) {
+  'statue' => l10n.representationStatue,
+  'framed_image' => l10n.representationFramedImage,
+  'poster' => l10n.representationPoster,
+  'printed_image' => l10n.representationPrintedImage,
+  'relief' => l10n.representationRelief,
+  'shivling' => l10n.representationShivling,
+  'physical_object' => l10n.representationPhysicalObject,
+  _ => l10n.representationUnknown,
+};

@@ -90,7 +90,9 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
               emphasised: true,
               onTap: _picking
                   ? null
-                  : () => _pick((MediaPicker picker) => picker.captureFromCamera()),
+                  : () => _pick(
+                      (MediaPicker picker) => picker.captureFromCamera(),
+                    ),
             ),
             const SizedBox(height: Insets.sm),
             ActionCard(
@@ -98,15 +100,15 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
               icon: Icons.photo_library_outlined,
               onTap: _picking
                   ? null
-                  : () => _pick((MediaPicker picker) => picker.pickFromGallery()),
+                  : () =>
+                        _pick((MediaPicker picker) => picker.pickFromGallery()),
             ),
             if (_picking)
               const Padding(
                 padding: EdgeInsets.only(top: Insets.lg),
                 child: LinearProgressIndicator(),
               ),
-            if (failure != null)
-              ErrorView(message: _messageFor(l10n, failure)),
+            if (failure != null) ErrorView(message: _messageFor(l10n, failure)),
           ],
         ),
       ),

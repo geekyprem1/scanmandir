@@ -2,6 +2,7 @@ import { registerJobHandler } from '../../shared/jobs/registry.js';
 import type { VisionProvider } from '../../modules/vision/provider.js';
 import { INTERNAL_ECHO_JOB, internalEchoHandler } from './internal-echo.js';
 import { SCAN_ANALYZE_JOB, createScanAnalyzeHandler } from './scan-analyze.js';
+import { SCAN_GENERATE_REPORT_JOB, scanGenerateReportHandler } from './scan-generate-report.js';
 import { SCAN_PREPARE_JOB, scanPrepareHandler } from './scan-prepare.js';
 
 /**
@@ -21,4 +22,5 @@ export function registerAllJobHandlers(options: { visionProvider?: VisionProvide
       ? createScanAnalyzeHandler({ provider: options.visionProvider })
       : createScanAnalyzeHandler(),
   );
+  registerJobHandler(SCAN_GENERATE_REPORT_JOB, scanGenerateReportHandler);
 }

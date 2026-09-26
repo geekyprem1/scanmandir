@@ -40,14 +40,12 @@ export async function appendOutboxEvent(tx: Queryable, input: OutboxEventInput):
 const EVENT_TO_JOB: Record<string, string> = {
   'internal.echo.requested': 'internal.echo',
   // A verified upload is prepared first: decode, bound, strip metadata, and only then
-  // ask for vision. The analysis handler itself arrives with the vision stage (Phase 5);
-  // until it exists the job is created but has no handler, which a running worker fails
-  // permanently — and the client can recover from with the retry endpoint once that lands.
+  // ask for vision.
   'scan.upload_verified': 'scan.prepare',
   'scan.prepared': 'scan.analyze',
-  // The analysis is stored and the scan waits for the user's confirmation. Report
-  // generation reads the confirmed revision and arrives with Phase 7.
-  'scan.analyzed': 'scan.generate_report',
+  // The report is generated from what the user confirmed, not from what the model saw: an
+  // analysis that is waiting for a confirmation has no consequence yet, which is why there
+  // is no event for it here.
   'scan.confirmed': 'scan.generate_report',
 };
 

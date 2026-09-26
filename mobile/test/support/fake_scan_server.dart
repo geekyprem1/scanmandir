@@ -135,7 +135,10 @@ class ScanServer {
       observationReads++;
       return scriptedAnswer(
         200,
-        scriptedObservationsBody(observations: observations, analysed: observations.isNotEmpty),
+        scriptedObservationsBody(
+          observations: observations,
+          analysed: observations.isNotEmpty,
+        ),
       );
     }
     if (call.method == 'POST' && call.path.endsWith('/confirmation')) {

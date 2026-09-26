@@ -90,7 +90,9 @@ void main() {
   ) async {
     final FakeMediaPicker picker = FakeMediaPicker(
       photo: samplePickedPhoto(),
-      cameraFailure: const MediaPickerException(PickFailureKind.permissionDenied),
+      cameraFailure: const MediaPickerException(
+        PickFailureKind.permissionDenied,
+      ),
     );
     final FakeHttpTransport transport = await pumpCapture(
       tester,
@@ -207,9 +209,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      transport.calls
-          .where((RecordedCall call) => call.method == 'GET')
-          .length,
+      transport.calls.where((RecordedCall call) => call.method == 'GET').length,
       greaterThan(polls),
     );
   });

@@ -1,5 +1,4 @@
 import { getPool, withTransaction } from '../../shared/db/pool.js';
-import { appendOutboxEvent } from '../../shared/jobs/outbox.js';
 import { PermanentJobError, RetryableJobError, type JobHandler } from '../../shared/jobs/types.js';
 import { getLogger } from '../../shared/logger.js';
 import { getObjectStorage } from '../../shared/storage/index.js';
@@ -18,7 +17,6 @@ import {
 import { recordAnalysis } from '../../modules/vision/repository.js';
 
 export const SCAN_ANALYZE_JOB = 'scan.analyze';
-export const SCAN_ANALYZED_EVENT = 'scan.analyzed';
 
 /** Which stage a terminal failure belongs to, so a retry can resume in the right place. */
 const FAILED_STAGE = 'vision';
@@ -123,13 +121,6 @@ export function createScanAnalyzeHandler(options: { provider?: VisionProvider } 
     await withTransaction(async (tx) => {
       await recordAnalysis(tx, { scanId, imageRevision, result });
       await setScanStatus(tx, scanId, 'awaiting_confirmation');
-      await appendOutboxEvent(tx, {
-        eventType: SCAN_ANALYZED_EVENT,
-        aggregateType: 'scan',
-        aggregateId: scanId,
-        dedupeKey: `scan:${scanId}:report:r${imageRevision}`,
-        payload: { scanId, userId: scan.userId, imageRevision },
-      });
     });
 
     logger.info(

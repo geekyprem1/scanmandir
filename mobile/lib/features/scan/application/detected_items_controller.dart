@@ -101,6 +101,7 @@ class DetectedItemsState {
     required this.scanId,
     required this.imageRevision,
     required this.items,
+    this.context = const <String, String>{},
     this.submitting = false,
     this.confirmedInputRevision,
     this.staleNotice = false,
@@ -109,6 +110,10 @@ class DetectedItemsState {
   final String scanId;
   final int imageRevision;
   final List<ReviewItem> items;
+
+  /// Tradition and context answers, by question id. An unanswered question is absent
+  /// rather than defaulted, so the report can say a tradition was not given (TASKS P5-06).
+  final Map<String, String> context;
   final bool submitting;
 
   /// Set once the server accepted the confirmation.
@@ -122,6 +127,7 @@ class DetectedItemsState {
 
   DetectedItemsState copyWith({
     List<ReviewItem>? items,
+    Map<String, String>? context,
     bool? submitting,
     int? confirmedInputRevision,
     bool? staleNotice,
@@ -130,8 +136,10 @@ class DetectedItemsState {
       scanId: scanId,
       imageRevision: imageRevision,
       items: items ?? this.items,
+      context: context ?? this.context,
       submitting: submitting ?? this.submitting,
-      confirmedInputRevision: confirmedInputRevision ?? this.confirmedInputRevision,
+      confirmedInputRevision:
+          confirmedInputRevision ?? this.confirmedInputRevision,
       staleNotice: staleNotice ?? this.staleNotice,
     );
   }
@@ -157,13 +165,17 @@ class DetectedItemsController extends Notifier<UiState<DetectedItemsState>> {
     if (!silent) _setState(const UiLoading<DetectedItemsState>());
     final ScanApi api = ref.read(scanApiProvider);
     try {
-      final ScanObservations observations = await api.readObservations(scanId: scanId);
+      final ScanObservations observations = await api.readObservations(
+        scanId: scanId,
+      );
       _setState(
         UiContent<DetectedItemsState>(
           DetectedItemsState(
             scanId: observations.scanId,
             imageRevision: observations.imageRevision,
-            items: observations.observations.map(ReviewItem.fromObservation).toList(),
+            items: observations.observations
+                .map(ReviewItem.fromObservation)
+                .toList(),
             staleNotice: silent,
           ),
         ),
@@ -181,10 +193,15 @@ class DetectedItemsController extends Notifier<UiState<DetectedItemsState>> {
 
   void confirmItem(String id) => _mapItems((item) {
     if (item.id != id) return item;
-    return item.withAction(item.action == ReviewAction.corrected ? item.action : ReviewAction.confirmed);
+    return item.withAction(
+      item.action == ReviewAction.corrected
+          ? item.action
+          : ReviewAction.confirmed,
+    );
   });
 
-  void removeItem(String id) => _mapItems((item) => item.id == id ? null : item);
+  void removeItem(String id) =>
+      _mapItems((item) => item.id == id ? null : item);
 
   void correctItem(String id, String label) => _mapItems((item) {
     if (item.id != id) return item;
@@ -205,7 +222,25 @@ class DetectedItemsController extends Notifier<UiState<DetectedItemsState>> {
       verificationRequired: true,
       action: ReviewAction.added,
     );
-    _setState(UiContent<DetectedItemsState>(current.copyWith(items: <ReviewItem>[...current.items, added])));
+    _setState(
+      UiContent<DetectedItemsState>(
+        current.copyWith(items: <ReviewItem>[...current.items, added]),
+      ),
+    );
+  }
+
+  /// Records one tradition or context answer. Questions can be skipped, and a skipped
+  /// question stays out of the map rather than becoming a default.
+  void answer(String question, String value) {
+    final DetectedItemsState? current = state.valueOrNull;
+    if (current == null || current.isConfirmed) return;
+    _setState(
+      UiContent<DetectedItemsState>(
+        current.copyWith(
+          context: <String, String>{...current.context, question: value},
+        ),
+      ),
+    );
   }
 
   /// Sends the confirmation. Its result is the input every later stage reads.
@@ -213,7 +248,9 @@ class DetectedItemsController extends Notifier<UiState<DetectedItemsState>> {
     final DetectedItemsState? current = state.valueOrNull;
     if (current == null || current.submitting) return;
 
-    _setState(UiContent<DetectedItemsState>(current.copyWith(submitting: true)));
+    _setState(
+      UiContent<DetectedItemsState>(current.copyWith(submitting: true)),
+    );
     final ScanApi api = ref.read(scanApiProvider);
     try {
       final ConfirmationResult result = await api.confirm(
@@ -221,13 +258,19 @@ class DetectedItemsController extends Notifier<UiState<DetectedItemsState>> {
         expectedImageRevision: current.imageRevision,
         // Everything on the list goes, including what the user left alone: an object they
         // did not touch is one they accepted, and the report is built from this document.
-        objects: current.items.map((ReviewItem item) => item.toInput()).toList(),
+        objects: current.items
+            .map((ReviewItem item) => item.toInput())
+            .toList(),
+        context: current.context,
       );
       if (_disposed) return;
       final DetectedItemsState latest = state.valueOrNull ?? current;
       _setState(
         UiContent<DetectedItemsState>(
-          latest.copyWith(submitting: false, confirmedInputRevision: result.inputRevision),
+          latest.copyWith(
+            submitting: false,
+            confirmedInputRevision: result.inputRevision,
+          ),
         ),
       );
     } on TransportException catch (error) {

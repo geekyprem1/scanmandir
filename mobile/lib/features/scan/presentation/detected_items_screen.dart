@@ -27,7 +27,8 @@ class DetectedItemsScreen extends ConsumerStatefulWidget {
   const DetectedItemsScreen({super.key});
 
   @override
-  ConsumerState<DetectedItemsScreen> createState() => _DetectedItemsScreenState();
+  ConsumerState<DetectedItemsScreen> createState() =>
+      _DetectedItemsScreenState();
 }
 
 class _DetectedItemsScreenState extends ConsumerState<DetectedItemsScreen> {
@@ -52,7 +53,9 @@ class _DetectedItemsScreenState extends ConsumerState<DetectedItemsScreen> {
       );
     }
 
-    final Uint8List? photo = ref.read(scanSubmissionControllerProvider.notifier).photo;
+    final Uint8List? photo = ref
+        .read(scanSubmissionControllerProvider.notifier)
+        .photo;
     if (photo != null) unawaited(_measure(photo));
   }
 
@@ -101,9 +104,11 @@ class _DetectedItemsScreenState extends ConsumerState<DetectedItemsScreen> {
                     onRemove: controller.removeItem,
                     onCorrect: controller.correctItem,
                     onAdd: controller.addItem,
-                    onSubmit: controller.submit,
+                    onContinue: () => context.push('/scan/context'),
                   ),
-          UiRecoverableError<DetectedItemsState>(failure: final Failure failure) =>
+          UiRecoverableError<DetectedItemsState>(
+            failure: final Failure failure,
+          ) =>
             FailureView(failure: failure, onRetry: () => _reload(controller)),
           UiTerminalError<DetectedItemsState>(failure: final Failure failure) =>
             FailureView(failure: failure),
@@ -185,7 +190,7 @@ class _Review extends StatelessWidget {
     required this.onRemove,
     required this.onCorrect,
     required this.onAdd,
-    required this.onSubmit,
+    required this.onContinue,
   });
 
   final DetectedItemsState data;
@@ -195,7 +200,10 @@ class _Review extends StatelessWidget {
   final void Function(String id) onRemove;
   final void Function(String id, String label) onCorrect;
   final void Function(String label) onAdd;
-  final Future<void> Function() onSubmit;
+
+  /// The confirmation is sent from the context screen, so the objects and the answers
+  /// commit together as one document (TASKS P5-07).
+  final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -251,9 +259,9 @@ class _Review extends StatelessWidget {
                 ),
                 child: Text(
                   l10n.detectedItemsIntro,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               if (data.items.isEmpty)
@@ -273,7 +281,10 @@ class _Review extends StatelessWidget {
                     title: Text(labelDisplayName(l10n, item.label)),
                     subtitle: Text(
                       <String>[
-                        representationDisplayName(l10n, item.representationType),
+                        representationDisplayName(
+                          l10n,
+                          item.representationType,
+                        ),
                         if (item.box != null) l10n.detectedLocationMarked,
                       ].join(' · '),
                     ),
@@ -298,7 +309,9 @@ class _Review extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.edit_outlined),
                           tooltip: l10n.detectedCorrectTitle,
-                          onPressed: () => _pickLabel(context, item.category, (String label) {
+                          onPressed: () => _pickLabel(context, item.category, (
+                            String label,
+                          ) {
                             onCorrect(item.id, label);
                           }),
                         ),
@@ -325,12 +338,15 @@ class _Review extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.lg),
+          padding: const EdgeInsets.fromLTRB(
+            Insets.lg,
+            0,
+            Insets.lg,
+            Insets.lg,
+          ),
           child: FilledButton(
-            onPressed: data.submitting ? null : () => unawaited(onSubmit()),
-            child: Text(
-              data.submitting ? l10n.detectedSubmitting : l10n.detectedSubmit,
-            ),
+            onPressed: onContinue,
+            child: Text(l10n.actionContinue),
           ),
         ),
       ],

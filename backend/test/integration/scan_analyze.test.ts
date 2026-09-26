@@ -172,12 +172,13 @@ describe('scan analysis', () => {
     expect(run.rows[0]?.normalization.length).toBeGreaterThanOrEqual(2);
     expect(run.rows[0]?.contract_violations.length).toBeGreaterThanOrEqual(2);
 
-    // The next stage is queued but not run: report generation is Phase 7.
+    // The consequence of an analysis is waiting for a person, not a job: nothing is queued
+    // until the user confirms, and the report is generated from what they confirmed.
     expect(
       await countWhere('outbox_events', 'aggregate_id = $1 AND event_type = $2', [scanId, 'scan.analyzed']),
-    ).toBe(1);
+    ).toBe(0);
     await dispatchOutbox(5);
-    expect(await countWhere('jobs', 'dedupe_key = $1', [`scan:${scanId}:report:r1`])).toBe(1);
+    expect(await countWhere('jobs', 'dedupe_key = $1', [`scan:${scanId}:report:input1`])).toBe(0);
   });
 
   it('sends a photo the gate refuses back for a retake and releases the allowance', async () => {

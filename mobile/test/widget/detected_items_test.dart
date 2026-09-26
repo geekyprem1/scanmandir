@@ -46,10 +46,7 @@ Future<ScanServer> pumpToDetected(
         authServiceProvider.overrideWithValue(FakeAuthService()),
         pollDelayProvider.overrideWithValue((Duration duration) async {}),
         pollPolicyProvider.overrideWithValue(
-          const PollPolicy(
-            firstDelay: Duration(milliseconds: 1),
-            maxPolls: 2,
-          ),
+          const PollPolicy(firstDelay: Duration(milliseconds: 1), maxPolls: 2),
         ),
       ],
       child: const ScanMyMandirApp(),
@@ -143,7 +140,11 @@ void main() {
     final ScanServer server = await pumpToDetected(
       tester,
       observations: <Map<String, Object?>>[
-        scriptedObservation(id: 'obs_001', label: 'ganesh', category: 'deity_representation'),
+        scriptedObservation(
+          id: 'obs_001',
+          label: 'ganesh',
+          category: 'deity_representation',
+        ),
         scriptedObservation(id: 'obs_002', label: 'diya'),
       ],
     );
@@ -155,12 +156,22 @@ void main() {
     await tester.tap(find.text('Bell'));
     await tester.pumpAndSettle();
 
+    // Continue to the context questions, answer one, and confirm from there: the objects
+    // and the answers are one document.
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    expect(find.text('A few questions'), findsOneWidget);
+
+    await tester.tap(find.text('North Indian'));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Confirm and continue'));
     await tester.pumpAndSettle();
 
     expect(server.confirms, 1);
     final List<Object?> objects =
-        (server.lastConfirmation?['objects'] as List<Object?>?) ?? const <Object?>[];
+        (server.lastConfirmation?['objects'] as List<Object?>?) ??
+        const <Object?>[];
     expect(objects, hasLength(2));
 
     final Map<String, Object?> corrected = objects
@@ -169,37 +180,48 @@ void main() {
     expect(corrected['label'], 'bell');
     expect(corrected['action'], 'corrected');
     expect(corrected['correctedFrom'], 'diya');
-    // The photo revision the user was looking at travels with the confirmation.
+    // The photo revision the user was looking at travels with the confirmation, and so do
+    // the answers they gave.
     expect(server.lastConfirmation?['expectedImageRevision'], 1);
+    expect(server.lastConfirmation?['context'], <String, Object?>{
+      'tradition': 'north_indian',
+    });
 
     // And the screen says what happened rather than leaving the user on a dead form.
     expect(find.text('Confirmed'), findsOneWidget);
     expect(find.textContaining('report is being prepared'), findsOneWidget);
   });
 
-  testWidgets('a confirmation written against an older photo is not lost silently', (
-    WidgetTester tester,
-  ) async {
-    final ScanServer server = await pumpToDetected(
-      tester,
-      observations: <Map<String, Object?>>[
-        scriptedObservation(id: 'obs_001', label: 'diya'),
-      ],
-      confirmStatus: 409,
-    );
+  testWidgets(
+    'a confirmation written against an older photo is not lost silently',
+    (WidgetTester tester) async {
+      final ScanServer server = await pumpToDetected(
+        tester,
+        observations: <Map<String, Object?>>[
+          scriptedObservation(id: 'obs_001', label: 'diya'),
+        ],
+        confirmStatus: 409,
+      );
 
-    await tester.tap(find.text('Confirm and continue'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Confirm and continue'));
+      await tester.pumpAndSettle();
 
-    expect(server.confirms, 1);
-    // The list is reloaded from the server, and the user is told why.
-    expect(server.observationReads, greaterThan(1));
-    expect(
-      find.text('This was changed somewhere else. Reload it and try again.'),
-      findsOneWidget,
-    );
-    expect(find.text('Diya'), findsOneWidget);
-  });
+      expect(server.confirms, 1);
+      // The list is reloaded from the server, and the user is told why.
+      expect(server.observationReads, greaterThan(1));
+      expect(
+        find.text('This was changed somewhere else. Reload it and try again.'),
+        findsOneWidget,
+      );
+
+      // Back on the list, the reloaded items are there rather than the refused edit.
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Diya'), findsOneWidget);
+    },
+  );
 
   testWidgets('its icon-only controls carry their purpose', (
     WidgetTester tester,

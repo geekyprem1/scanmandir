@@ -8,7 +8,6 @@ import 'package:scan_my_mandir/core/providers.dart';
 import 'package:scan_my_mandir/features/home/presentation/home_screen.dart';
 import 'package:scan_my_mandir/features/onboarding/application/onboarding_controller.dart';
 import 'package:scan_my_mandir/features/report/presentation/report_overview_screen.dart';
-import 'package:scan_my_mandir/features/scan/presentation/context_questions_screen.dart';
 
 import '../support/fake_auth_service.dart';
 import '../support/fake_http_transport.dart';
@@ -101,9 +100,6 @@ void main() {
       );
       expect(tester.takeException(), isNull);
 
-      await tapAt(tester, find.text('View report'));
-      expect(tester.takeException(), isNull);
-
       await scrollTo(tester, find.text('Two similar deity images'));
       await tapAt(tester, find.text('Two similar deity images'));
       expect(tester.takeException(), isNull);
@@ -123,7 +119,6 @@ void main() {
       tester,
       find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
     );
-    await tapAt(tester, find.text('View report'));
     await scrollTo(tester, find.text('Two similar deity images'));
     await tapAt(tester, find.text('Two similar deity images'));
 
@@ -133,11 +128,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ReportOverviewScreen), findsOneWidget);
 
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-    expect(find.byType(ContextQuestionsScreen), findsOneWidget);
-
-    // The fixture walk starts at the preview entry point, so this lands on Home.
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.byType(HomeScreen), findsOneWidget);
@@ -152,7 +142,6 @@ void main() {
       tester,
       find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
     );
-    await tapAt(tester, find.text('View report'));
     await scrollTo(tester, find.text('Two similar deity images'));
     await tapAt(tester, find.text('Two similar deity images'));
     expect(find.text('What we saw'), findsOneWidget);

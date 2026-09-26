@@ -59,7 +59,7 @@ class HomeScreen extends ConsumerWidget {
               ActionCard(
                 label: l10n.homePreviewJourneyAction,
                 icon: Icons.science_outlined,
-                onTap: () => context.push('/scan/context'),
+                onTap: () => context.push('/report'),
               ),
               const SizedBox(height: Insets.sm),
               ActionCard(

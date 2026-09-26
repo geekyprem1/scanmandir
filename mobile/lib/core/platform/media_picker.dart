@@ -101,11 +101,7 @@ class SystemMediaPicker implements MediaPicker {
       throw const MediaPickerException(PickFailureKind.failed);
     }
 
-    return PickedPhoto(
-      bytes: bytes,
-      contentType: contentType,
-      name: file.name,
-    );
+    return PickedPhoto(bytes: bytes, contentType: contentType, name: file.name);
   }
 
   /// The plugin reports a mime type on some platforms and nothing on others, so the

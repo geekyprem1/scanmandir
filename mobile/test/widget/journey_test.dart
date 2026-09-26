@@ -49,14 +49,13 @@ Future<void> tapAt(WidgetTester tester, Finder finder) async {
 
 /// Walks from Home to the report overview.
 ///
-/// Capture, progress and the confirmation screen are real now, so the fixture walk starts
-/// at the one fixture screen that remains in the journey: the context questions.
+/// Everything before the report is real now, so the fixture walk is a single step: the
+/// preview card opens the report fixture directly.
 Future<void> walkToReport(
   WidgetTester tester, {
   String previewLabel = 'Journey preview (sample data)',
 }) async {
   await tapAt(tester, find.widgetWithText(ActionCard, previewLabel));
-  await tapAt(tester, find.text('View report'));
 }
 
 void main() {
@@ -70,16 +69,13 @@ void main() {
       find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
     );
 
-    // Every fixture screen says what it is.
+    // The report is the last screen still rendering a fixture, and it says so.
     expect(
       find.text(
         'Development preview with sample data — not a real scan result.',
       ),
       findsOneWidget,
     );
-    expect(find.text('A few questions'), findsOneWidget);
-
-    await tapAt(tester, find.text('View report'));
     expect(find.text('Mandir scan complete'), findsOneWidget);
     expect(find.text('Items detected: 4'), findsOneWidget);
     expect(find.text('Findings requiring review: 1'), findsOneWidget);
@@ -135,11 +131,6 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('पहचानी गई वस्तुएँ'), findsNothing);
-    expect(find.text('कुछ सवाल'), findsOneWidget);
-
-    await tapAt(tester, find.text('रिपोर्ट देखें'));
-
     expect(find.text('मंदिर स्कैन पूरा हुआ'), findsOneWidget);
     expect(find.text('ठीक लगता है'), findsOneWidget);
     expect(find.text('सुरक्षा'), findsOneWidget);

@@ -13,6 +13,7 @@ import {
   type ScanStatus,
 } from '../../modules/scans/scan_repository.js';
 import { findLatestAnalysis } from '../../modules/vision/repository.js';
+import { findReport } from '../../modules/reports/report_builder.js';
 import {
   ALL_CANDIDATE_LABELS,
   OBSERVATION_CATEGORIES,
@@ -510,6 +511,45 @@ export async function registerScanRoutes(server: AppServer): Promise<void> {
       confirmedAt: input.createdAt.toISOString(),
       objects: input.objects,
       context: input.context,
+    };
+  });
+
+  /**
+   * The generated report (TASKS P7-01).
+   *
+   * A missing report is not a 404: a scan that is still generating one has a status that
+   * says so, and the screen asks again rather than treating "not yet" as "not found".
+   */
+  server.get('/v1/scans/:id/report', { preHandler: server.authenticate }, async (request) => {
+    const caller = requireCaller(request);
+    const { id } = parseOrThrow(ScanParamsSchema, request.params);
+
+    const scan = await findOwnedScan(getPool(), caller.id, id);
+    if (!scan) {
+      throw new AppError(ERROR_CODES.NOT_FOUND, 'Scan not found.');
+    }
+
+    const report = scan.inputRevision === 0 ? null : await findReport(getPool(), scan.id, scan.inputRevision);
+
+    if (!report) {
+      return {
+        scanId: scan.id,
+        available: false,
+        status: scan.status,
+        nextAction: scanBody(scan)['nextAction'],
+        report: null,
+      };
+    }
+
+    return {
+      scanId: scan.id,
+      available: true,
+      status: scan.status,
+      reportId: report.id,
+      inputRevision: report.inputRevision,
+      imageRevision: report.imageRevision,
+      generatedAt: report.createdAt.toISOString(),
+      report: report.body,
     };
   });
 }

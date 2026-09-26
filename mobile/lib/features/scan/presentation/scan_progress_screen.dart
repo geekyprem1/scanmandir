@@ -108,7 +108,12 @@ class _Halted extends StatelessWidget {
       children: <Widget>[
         Expanded(child: FailureView(failure: failure)),
         Padding(
-          padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.lg),
+          padding: const EdgeInsets.fromLTRB(
+            Insets.lg,
+            0,
+            Insets.lg,
+            Insets.lg,
+          ),
           child: FilledButton(
             onPressed: () => context.go('/upload'),
             child: Text(l10n.scanNothingAction),
@@ -129,7 +134,8 @@ class _StageList extends StatelessWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final int current = ScanStage.values.indexOf(submission.stage);
-    final bool stillWorking = submission.stage != ScanStage.readyForConfirmation;
+    final bool stillWorking =
+        submission.stage != ScanStage.readyForConfirmation;
 
     return ListView(
       padding: const EdgeInsets.all(Insets.lg),
@@ -143,7 +149,9 @@ class _StageList extends StatelessWidget {
                   : index == current
                   ? Icons.radio_button_checked
                   : Icons.radio_button_unchecked,
-              color: index <= current ? scheme.primary : scheme.onSurfaceVariant,
+              color: index <= current
+                  ? scheme.primary
+                  : scheme.onSurfaceVariant,
             ),
             title: Text(
               _labelFor(l10n, stage),
