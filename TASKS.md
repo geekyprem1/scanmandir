@@ -1,6 +1,6 @@
 # Scan My Mandir — Implementation Tasks
 
-**Version:** 1.10  
+**Version:** 1.11  
 **Updated:** 26 September 2026  
 **Stack:** Flutter/Dart, TypeScript/Fastify, PostgreSQL, private object storage  
 **Release target:** Android first; iOS later
@@ -29,6 +29,7 @@
 - [x] BUILD-05 — Phase 2 continued. P2-06 states delivered where a host exists: `EmptyView` for the empty case and `FailureView` mapping every failure kind to bilingual copy with retry decided by retryability; the untranslated retry default in `ErrorView` is gone, and an outdated private-field constructor workaround in `ApiClient` was replaced with the now-supported private named parameter; 45 Flutter tests pass and `flutter analyze` is clean.
 - [x] BUILD-06 — Phase 2 continued. P2-07 verified: journey back navigation, background/resume state, doubled system text scale, and semantics for icon-only controls, covered by `mobile/test/widget/accessibility_test.dart` (6 tests); 51 Flutter tests pass and `flutter analyze` is clean.
 - [x] BUILD-07 — The app was launched on a real Android target for the first time. The debug APK was installed on the Pixel_4 AVD (Android 14, API 34, x86_64) and the entire fixture journey was walked on the device in Hindi, with a clean `logcat`. "Flutter boots on Android" is no longer an assumption.
+- [x] BUILD-08 — Version control and CI are live. The initial commit `9de6df1` (193 files) was pushed to `github.com/geekyprem1/scanmandir`, and the push ran all three CI jobs green on the first attempt. `.gitattributes` pins LF so Windows checkouts cannot break `format:check`.
 
 ## Milestones and dependencies
 
@@ -82,6 +83,8 @@
 
 **Complete when:** Flutter boots on Android, the API serves a health response, migrations initialize storage, a worker can process an internal job, and the test suite runs in CI.
 
+**Status:** complete. All five completion criteria are verified: the app boots on an Android emulator, the API serves health, migrations initialise storage, a worker processes an internal job, and the test suite now runs green in CI. P1-06 remains unchecked by design — it waits on the vision evaluation (P0-05) and the label catalog (P0-06), not on remaining work in this phase.
+
 **Verified:**
 
 - `GET /health` returns `{"status":"ok"}` and `GET /health/ready` returns `database: ok, storage: ok` over real HTTP, not only through in-process injection.
@@ -93,11 +96,11 @@
 - Deleting `mobile/lib/l10n/generated/` and running `flutter gen-l10n` regenerates it and analysis still passes, so CI does not depend on generated code being committed.
 - `mobile/l10n-untranslated.txt` is empty, so Hindi and English are at parity for the current string set.
 - The debug APK was installed and launched on the Pixel_4 AVD (Android 14, API 34, x86_64). Onboarding rendered in English and switched to Hindi on the device with correct Devanagari fallback, and the whole fixture journey — progress, detected items, context questions, report overview, finding detail, source detail — was walked there. `logcat` stayed clean: no Flutter exceptions and no overflow reports. "Flutter boots on Android" is now proven on a target, not only by packaging.
+- CI has now run for real. The repository was initialised and the first commit pushed to `github.com/geekyprem1/scanmandir`; the push triggered all three jobs and every one finished green on the first attempt — backend (format, typecheck, unit tests and PostgreSQL integration tests), Flutter app (generate, analyze, test, debug APK build) and the vision spike harness. Run `36237838109`. The workflow is written *and* proven.
 
 **Not verified:**
 
-- CI has not run: the workflow has never executed on a runner. It is written, not proven.
-- P1-06 is open by design.
+- P1-06 is open by design, downstream of the vision evaluation (P0-05) and the label catalog (P0-06). It is the only Phase 1 item still unchecked.
 
 ## Phase 2 — Flutter shell and user experience
 
