@@ -9,6 +9,7 @@
     "eval": "tsx src/run.ts",
     "eval:dry": "tsx src/run.ts --dry-run",
     "report": "tsx src/report.ts",
+    "score": "node score.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

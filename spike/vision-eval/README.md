@@ -94,14 +94,33 @@ a human can see what is in it without opening twenty files. Rebuild it with
 | `out/raw/<photo>.json` | Full record: raw response, tokens, latency, attempts, validation errors |
 | `out/summary.md` | Reliability, latency, measured cost, label frequency, confidence spread |
 | `out/per-photo.csv` | One row per photo |
-| `out/scoring-sheet.csv` | One row per detected object, with blank verdict columns for you |
-| `out/missed-objects.csv` | For objects the model never reported. Never overwritten once created. |
+| `out/scoring-sheet.csv` | One row per detected object, with the verdict columns `npm run score` fills in |
+| `out/missed-objects.csv` | Objects the model never reported. Written by `npm run score`; a report run never overwrites it |
+| `out/scoring-summary.md` | Precision, recall, deity-label precision and the per-label table |
+| `out/verdict-*.jpg` | Each photo beside the claims made about it, for scoring by eye |
+
+## Scoring
+
+`node make-verdict-sheet.mjs` renders the verdict sheets. `npm run score` applies the
+verdicts held in `score.mjs` to those sheets and computes what a person would otherwise add
+up by hand: precision, recall and deity-label precision, written to
+`out/scoring-summary.md`.
+
+The judgement is data in `score.mjs` rather than something the harness infers, because only
+a person who has looked at the photo can say whether a claim is true. The conventions are
+at the top of that file; the one that matters is `partial`, which covers non-committal
+placeholders (`unknown_idol`, `other_object`) and claims that cannot be verified at the
+resolution they were scored at. Partial sits outside both sides of precision and counts as
+a miss in recall, so an honest "I cannot tell" never inflates a number.
 
 ## The part the harness cannot do
 
-It has no idea what is actually in your photos. Precision and recall do not exist until you fill in `scoring-sheet.csv` and `missed-objects.csv` by hand.
+It has no idea what is actually in your photos. Precision and recall exist only because a
+person scored the sheets; the numbers carry that person's judgement, not a measurement.
 
-Until that is done, nothing here justifies fixing the launch label catalog (P0-06) or the acceptance thresholds (P0-08). A high `model_confidence` is not evidence of correctness — PRD section 10 and architecture section 7 both say so explicitly.
+Nothing here justifies fixing the launch label catalog (P0-06) or the acceptance thresholds
+(P0-08) until the set is large enough to carry them. A high `model_confidence` is not
+evidence of correctness — PRD section 10 and architecture section 7 both say so explicitly.
 
 ## What to conclude afterwards
 
