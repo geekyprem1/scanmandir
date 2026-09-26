@@ -1,7 +1,8 @@
 import { SignJWT, createLocalJWKSet, exportJWK, generateKeyPair, type JWTVerifyGetKey } from 'jose';
+import { SUPABASE_TEST_AUDIENCE, SUPABASE_TEST_ISSUER } from './supabase-test-project.js';
 
-const ISSUER = 'https://test-project.supabase.co/auth/v1';
-const AUDIENCE = 'authenticated';
+const ISSUER = SUPABASE_TEST_ISSUER;
+const AUDIENCE = SUPABASE_TEST_AUDIENCE;
 const TRUSTED_KID = 'test-key-1';
 
 export interface SignOptions {

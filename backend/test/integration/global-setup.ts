@@ -2,14 +2,16 @@ import { runMigrations } from '../../src/shared/db/migrate.js';
 import { closePool, getPool } from '../../src/shared/db/pool.js';
 import { resetConfigCache } from '../../src/shared/config.js';
 import { TEST_DATABASE_URL } from './database-url.js';
+import { SUPABASE_TEST_URL } from '../support/supabase-test-project.js';
 
 /**
  * Runs once for the whole integration project: confirm the test database is reachable,
  * then bring its schema up to date.
  *
  * globalSetup executes in Vitest's main process, where the project's `test.env` block
- * does not apply, so the environment is set here. getConfig() is lazy, so assigning
- * before the first database call is enough.
+ * does not apply, so every required variable is set here. getConfig() is lazy, so
+ * assigning before the first config read is enough. Locally the .env file would mask a
+ * missing assignment, but CI has no .env — an omission here fails the whole project.
  *
  * A missing database is reported as a setup problem rather than a wall of failing
  * assertions, because the usual cause is simply that the containers are not running.
@@ -17,6 +19,7 @@ import { TEST_DATABASE_URL } from './database-url.js';
 export async function setup(): Promise<void> {
   process.env.NODE_ENV = 'test';
   process.env.DATABASE_URL = TEST_DATABASE_URL;
+  process.env.SUPABASE_URL = SUPABASE_TEST_URL;
   resetConfigCache();
 
   try {

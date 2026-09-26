@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { TEST_DATABASE_URL } from './test/integration/database-url.js';
+import { SUPABASE_TEST_URL } from './test/support/supabase-test-project.js';
 
 /**
  * Two projects, matching the layers in ARCHITECTURE.md section 16.
@@ -21,7 +22,7 @@ export default defineConfig({
             // Never connected to by unit tests; config validation only requires it to exist.
             DATABASE_URL: 'postgres://unit-tests-do-not-connect',
             // Verification in tests uses a local key set; this only satisfies config.
-            SUPABASE_URL: 'https://test-project.supabase.co',
+            SUPABASE_URL: SUPABASE_TEST_URL,
           },
         },
       },
@@ -40,9 +41,8 @@ export default defineConfig({
             DATABASE_URL: TEST_DATABASE_URL,
             STORAGE_LOCAL_DIR: '.storage-test',
             STORAGE_URL_SECRET: 'integration_test_storage_secret_value',
-            // Matches the issuer and audience of the tokens signed in
-            // test/support/tokens.ts; verification uses a local key set, so no network.
-            SUPABASE_URL: 'https://test-project.supabase.co',
+            // Must agree with the issuer and audience used in test/support/tokens.ts.
+            SUPABASE_URL: SUPABASE_TEST_URL,
           },
         },
       },
