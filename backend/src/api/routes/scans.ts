@@ -11,6 +11,7 @@ import {
   type Scan,
   type ScanStatus,
 } from '../../modules/scans/scan_repository.js';
+import { findLatestAnalysis } from '../../modules/vision/repository.js';
 import { getConfig } from '../../shared/config.js';
 import { getPool, withTransaction } from '../../shared/db/pool.js';
 import { AppError, ERROR_CODES } from '../../shared/errors.js';
@@ -57,6 +58,8 @@ function scanBody(scan: Scan): Record<string, unknown> {
     imageRevision: scan.imageRevision,
     inputRevision: scan.inputRevision,
     failedStage: scan.failedStage,
+    /** The quality gate's reasons when the photo was refused; empty otherwise. */
+    retakeReasons: scan.retakeReason,
     nextAction: scan.deletedAt ? null : nextActionFor(scan.status),
     createdAt: scan.createdAt.toISOString(),
     updatedAt: scan.updatedAt.toISOString(),
@@ -276,5 +279,71 @@ export async function registerScanRoutes(server: AppServer): Promise<void> {
       throw new AppError(ERROR_CODES.NOT_FOUND, 'Scan not found.');
     }
     return scanBody(scan);
+  });
+
+  /**
+   * What the model saw, for the confirmation screen (TASKS P5-05).
+   *
+   * Only the latest analysis of the revision the scan is on: a retake moves to a new
+   * revision and a re-analysis inserts a new run, so older runs are history rather than
+   * something a screen should show. `modelConfidence` travels with each object but is the
+   * model's own uncalibrated number — nothing here may be presented as a probability of
+   * being correct (PRD section 10).
+   */
+  server.get('/v1/scans/:id/observations', { preHandler: server.authenticate }, async (request) => {
+    const caller = requireCaller(request);
+    const { id } = parseOrThrow(ScanParamsSchema, request.params);
+
+    const scan = await findOwnedScan(getPool(), caller.id, id);
+    if (!scan) {
+      throw new AppError(ERROR_CODES.NOT_FOUND, 'Scan not found.');
+    }
+
+    const analysis = await findLatestAnalysis(getPool(), scan.id, scan.imageRevision);
+    if (!analysis) {
+      // Not an error: a scan that has not been analysed yet has nothing to show, and the
+      // scan's own status already says which stage it is in.
+      return {
+        scanId: scan.id,
+        imageRevision: scan.imageRevision,
+        inputRevision: scan.inputRevision,
+        analysed: false,
+        run: null,
+        observations: [],
+        findings: [],
+      };
+    }
+
+    return {
+      scanId: scan.id,
+      imageRevision: scan.imageRevision,
+      inputRevision: scan.inputRevision,
+      analysed: true,
+      run: {
+        id: analysis.run.id,
+        model: analysis.run.model,
+        provider: analysis.run.provider,
+        promptVersion: analysis.run.promptVersion,
+        schemaVersion: analysis.run.schemaVersion,
+        latencyMs: analysis.run.latencyMs,
+        attempts: analysis.run.attempts,
+        imageUsable: analysis.run.imageUsable,
+        looksLikeHomeMandir: analysis.run.looksLikeHomeMandir,
+        qualityReasons: analysis.run.qualityReasons,
+        analysedAt: analysis.run.createdAt.toISOString(),
+      },
+      observations: analysis.observations.map((observation) => ({
+        id: observation.displayId,
+        category: observation.category,
+        label: observation.label,
+        representationType: observation.representationType,
+        groupId: observation.groupId,
+        memberLabels: observation.memberLabels,
+        boundingBox: observation.boundingBox,
+        modelConfidence: observation.modelConfidence,
+        verificationRequired: observation.verificationRequired,
+      })),
+      findings: analysis.findings,
+    };
   });
 }

@@ -79,6 +79,8 @@ What the constrained run showed:
 
 **Status:** Proposed — measured on a small set: reliability, latency and cost observed; precision 98.4% and deity precision 90.0% against recall 62.4%. Good enough to build the adapter against, not good enough to fix the launch catalog. The Sol escalation stays open.
 
+**Implemented.** The adapter (`backend/src/modules/vision/`) sends the schema-constrained request, applies the quality and relevance gate, normalizes what the evaluation showed needs normalizing, and stores observations immutably with the prompt and schema versions that produced them. Prompt v2 adds the home-versus-temple line the first evaluation showed was needed, and the first live run through the product pipeline produced fifteen observations with zero normalizations and zero contract violations. The measured numbers above belong to v1; v2 has not been re-measured on the full set yet, and that re-measurement is what would confirm the home-versus-temple improvement rather than merely suggesting it.
+
 ## D-05 — Estimated AI cost per scan
 
 **Status:** Estimate only — not measured

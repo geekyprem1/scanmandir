@@ -45,6 +45,9 @@ const EVENT_TO_JOB: Record<string, string> = {
   // permanently — and the client can recover from with the retry endpoint once that lands.
   'scan.upload_verified': 'scan.prepare',
   'scan.prepared': 'scan.analyze',
+  // The analysis is stored and the scan waits for the user's confirmation. Report
+  // generation reads the confirmed revision and arrives with Phase 7.
+  'scan.analyzed': 'scan.generate_report',
 };
 
 export interface DispatchResult {

@@ -89,6 +89,26 @@ const EnvSchema = z.object({
    */
   SCAN_FREE_ALLOWANCE_PER_PERIOD: z.coerce.number().int().nonnegative().default(3),
   QUOTA_PERIOD_OFFSET_MINUTES: z.coerce.number().int().min(-720).max(840).default(330),
+
+  /**
+   * Vision provider (ARCHITECTURE.md sections 6 and 7).
+   *
+   * The key is server-only: it never reaches the app (section 12). Optional here so tests
+   * and the development API can run without one; the adapter refuses to call anything
+   * without it, and production must have it.
+   */
+  OPENROUTER_API_KEY: z.string().optional(),
+  VISION_BASE_URL: z.string().url().default('https://openrouter.ai/api/v1'),
+  /** Chosen from the evaluation in docs/decisions.md D-04, not from preference. */
+  VISION_MODEL: z.string().min(1).default('openai/gpt-6-luna'),
+  VISION_TIMEOUT_MS: z.coerce.number().int().positive().default(90_000),
+  /** Bounded transient retries, per ARCHITECTURE.md section 7. */
+  VISION_MAX_ATTEMPTS: z.coerce.number().int().positive().default(3),
+  /** Excludes providers that may retain or train on submitted photos (D-08). */
+  VISION_DENY_DATA_COLLECTION: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((value) => value === 'true'),
 });
 
 export type AppConfig = z.infer<typeof EnvSchema> & {
@@ -122,6 +142,12 @@ function load(): AppConfig {
   if (env.STORAGE_DRIVER === 'supabase' && !env.SUPABASE_SERVICE_KEY) {
     throw new Error(
       'STORAGE_DRIVER=supabase requires SUPABASE_SERVICE_KEY. The publishable key cannot write media.',
+    );
+  }
+
+  if (env.NODE_ENV === 'production' && !env.OPENROUTER_API_KEY) {
+    throw new Error(
+      'OPENROUTER_API_KEY is required in production: without it the worker cannot analyse a single photo.',
     );
   }
 

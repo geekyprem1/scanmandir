@@ -4,9 +4,10 @@ import { buildServer } from '../../src/api/server.js';
 import type { AppServer } from '../../src/api/types.js';
 import { getPool } from '../../src/shared/db/pool.js';
 import { dispatchOutbox } from '../../src/shared/jobs/outbox.js';
-import { clearJobHandlers } from '../../src/shared/jobs/registry.js';
+import { clearJobHandlers, registerJobHandler } from '../../src/shared/jobs/registry.js';
 import { getObjectStorage } from '../../src/shared/storage/index.js';
-import { registerAllJobHandlers } from '../../src/worker/handlers/index.js';
+import { INTERNAL_ECHO_JOB, internalEchoHandler } from '../../src/worker/handlers/internal-echo.js';
+import { SCAN_PREPARE_JOB, scanPrepareHandler } from '../../src/worker/handlers/scan-prepare.js';
 import { tick } from '../../src/worker/runner.js';
 import { createTestSession, type TestSession } from '../support/tokens.js';
 import { countWhere, resetQueueTables, resetScanTables } from './helpers.js';
@@ -26,7 +27,10 @@ describe('scan preparation', () => {
     await resetScanTables();
     await resetQueueTables();
     clearJobHandlers();
-    registerAllJobHandlers();
+    // Only the stages this suite is about. The vision stage has its own suite, and leaving
+    // it unregistered here stops this one from reaching for a provider.
+    registerJobHandler(INTERNAL_ECHO_JOB, internalEchoHandler);
+    registerJobHandler(SCAN_PREPARE_JOB, scanPrepareHandler);
   });
 
   afterAll(async () => {

@@ -21,6 +21,8 @@ export interface Scan {
   imageRevision: number;
   inputRevision: number;
   failedStage: string | null;
+  /** The quality gate's own codes, when the scan was sent back for a retake (P5-02). */
+  retakeReason: string[];
   deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -33,6 +35,7 @@ interface ScanRow {
   image_revision: number;
   input_revision: number;
   failed_stage: string | null;
+  retake_reason: string[] | null;
   deleted_at: Date | null;
   created_at: Date;
   updated_at: Date;
@@ -46,6 +49,7 @@ function toScan(row: ScanRow): Scan {
     imageRevision: row.image_revision,
     inputRevision: row.input_revision,
     failedStage: row.failed_stage,
+    retakeReason: row.retake_reason ?? [],
     deletedAt: row.deleted_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -53,7 +57,7 @@ function toScan(row: ScanRow): Scan {
 }
 
 const SELECT_COLUMNS =
-  'id, user_id, status, image_revision, input_revision, failed_stage, deleted_at, created_at, updated_at';
+  'id, user_id, status, image_revision, input_revision, failed_stage, retake_reason, deleted_at, created_at, updated_at';
 
 export interface CreateScanInput {
   userId: string;
@@ -128,20 +132,24 @@ export async function lockOwnedScan(db: Queryable, userId: string, scanId: strin
   return row ? toScan(row) : null;
 }
 
-/** Moves a scan to a new state, recording which stage failed when there is one. */
+/**
+ * Moves a scan to a new state, recording which stage failed when there is one, and why a
+ * retake was asked for when the quality gate refused the photo.
+ */
 export async function setScanStatus(
   db: Queryable,
   scanId: string,
   status: ScanStatus,
-  options: { failedStage?: string | null } = {},
+  options: { failedStage?: string | null; retakeReason?: string[] } = {},
 ): Promise<void> {
   await db.query(
     `UPDATE scans
         SET status = $2,
             failed_stage = $3,
+            retake_reason = COALESCE($4::text[], '{}'),
             updated_at = now()
       WHERE id = $1`,
-    [scanId, status, options.failedStage ?? null],
+    [scanId, status, options.failedStage ?? null, options.retakeReason ?? null],
   );
 }
 

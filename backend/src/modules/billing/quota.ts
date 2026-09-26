@@ -148,3 +148,35 @@ export async function consumeAllowance(db: Queryable, input: ReservationActionIn
     ],
   );
 }
+
+/** The reserve entry created with a scan. A release has to name it. */
+export function reservationKeyFor(scanId: string): string {
+  return `scan:${scanId}:reserve`;
+}
+
+/**
+ * Gives back a scan's reservation when the photo never became a report — a refusal by the
+ * quality gate, an image that could not be decoded, or a terminal failure.
+ *
+ * Returns false when there was no reservation to release, which happens when the scan
+ * already reached a state that consumed or released it. Callers treat that as "nothing to
+ * do" rather than an error: the ledger stays append-only and a double release is impossible
+ * because the operation key is unique (TASKS P4-09).
+ */
+export async function releaseScanAllowance(
+  db: Queryable,
+  input: { userId: string; scanId: string },
+): Promise<boolean> {
+  const reservationKey = reservationKeyFor(input.scanId);
+  const period = await findReservationPeriod(db, reservationKey);
+  if (!period) return false;
+
+  await releaseAllowance(db, {
+    userId: input.userId,
+    scanId: input.scanId,
+    reservationKey,
+    operationKey: `scan:${input.scanId}:release`,
+    period,
+  });
+  return true;
+}
