@@ -18,7 +18,7 @@ key.properties
 
 # Evaluation photos: real photos of people's homes. Never commit these.
 spike/vision-eval/photos/
-spike/vision-eval/out/
+spike/vision-eval/out*/
 eval-photos/
 
 # Node
