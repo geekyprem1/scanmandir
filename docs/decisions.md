@@ -52,6 +52,31 @@ Candidate is **OpenRouter** routing to **GPT-6 Luna**, with **GPT-6 Sol** as the
 
 Nothing about recognition quality has been tested. Luna is the cost-efficient tier; whether it can distinguish visually similar deities — for example Lakshmi from Saraswati, both seated female forms with overlapping iconography in small home idols — is unknown and is the single most important open question in the project.
 
+### First measurement, 26 September 2026
+
+Run on 20 freely licensed photos (`spike/vision-eval/photos/SOURCES.md`), 1024 px derivatives, temperature 0, `provider.data_collection = deny`, `openai/gpt-6-luna` served by OpenAI. The set is thin on real home mandirs — four of twenty — so this is a first signal, not the recorded evaluation.
+
+**The response format decides whether any of this works.** Same photos, same model, one setting apart:
+
+| | `json_object` | `json_schema` |
+|---|---|---|
+| Schema-valid responses | 4 of 20 | **20 of 20** |
+| Attempts | 3 on 17 photos | 1 on 19 |
+| Objects the harness could use | 0 | **95** |
+| Measured mean cost per scan | ₹0.2107 | **₹0.0727** |
+
+With `json_object` the model returned JSON that was close but not compliant — it omitted `category` and invented enum values (`garland` for `representation_type`) — so validation rejected nearly everything and the billed retries tripled the cost. **The production adapter must constrain the response with a schema**, not merely ask for JSON.
+
+What the constrained run showed:
+
+- **Bounding boxes are usable**: 95 of 95 objects carried one, so the detected-items overlay is not blocked.
+- **The label catalog held**: no label fell outside the candidate set. The model preferred caution — 20 of 95 objects were `unknown_idol` — and deity labels were sparse (ganesha 3, krishna 3, lakshmi, saraswati, durga, vishnu and kartikeya one each). Separating visually similar goddesses is therefore still unproven, and with four home photos this set cannot settle it. P0-06 stays open.
+- **Relevance and quality behave**: `looks_like_home_mandir` was true for all four genuine home-shrine photos and false for the three living rooms and all five aarti photos; the synthetic blur was the one image reported unusable. It was also true for three temple photos, so home-versus-temple is a limitation to handle in the prompt or the rules.
+- **One contract violation**: a group naming a single member. The adapter needs a normalization rule for that rather than a rejection.
+- **Precision and recall do not exist yet.** `out/scoring-sheet.csv` needs a human, and nothing above fixes the launch catalog or the thresholds.
+
+**Status:** Proposed — reliability, latency and cost measured on a small set; recognition quality unscored.
+
 ## D-05 — Estimated AI cost per scan
 
 **Status:** Estimate only — not measured
@@ -81,6 +106,22 @@ Every number above is an assumption. Image tokenization for this specific model 
 
 One assumption is riskier than the rest: **output tokens.** If the model emits reasoning tokens, billed completion tokens could be several times the 1,200 assumed here, and output is five times the price of input — so that single line dominates the total. The harness records `completion_tokens` as billed per photo rather than estimating, and counts retried attempts, so the measured figure includes both. Do not quote a cost from this table once real numbers exist.
 
+### Measured, 26 September 2026
+
+The first real run replaces those assumptions. Twenty photos, 1024 px derivatives, one model, one setting apart:
+
+| Measure | `json_schema` | `json_object` |
+|---|---|---|
+| Mean billed prompt tokens | 2,078 | 4,433 |
+| Mean billed completion tokens | 1,230 | 3,773 |
+| Mean cost per scan | **₹0.0727** | ₹0.2107 |
+| Highest single scan | ₹0.3877 | ₹0.5969 |
+| Projected 1,000 scans | **₹72.72** | ₹210.65 |
+
+The assumed total was close for one compliant call (~₹0.08 assumed, ₹0.07 measured). What moved the real number was **retries**: in `json_object` mode the same photos cost three times as much, because validation rejected most responses and a rejected response is still billed. Latency measured 2.0 s mean, 3.0 s p95 against the provisional 30 s target for the vision stage (architecture section 15).
+
+Two caveats: one small licensed set, and this is the vision call only — storage, egress and infrastructure sit outside it (D-07).
+
 ## D-06 — AI cost is not the binding constraint
 
 **Status:** Decided, following from D-05
@@ -89,6 +130,8 @@ At roughly ₹0.10–0.20 per scan against the ₹16 per scan implied by the pri
 
 1. **Select the model on recognition quality, not price.** Even a 20x escalation to Sol stays affordable, so being wrong about Luna is cheap to correct.
 2. Earlier reasoning in this project treated per-scan AI cost as a possible blocker. It is not. That reasoning is superseded.
+
+The first real measurement (D-05) came in at **₹0.0727 per scan**, so the margin is wider than assumed — and the same run showed that the bill is driven by retries, not by tokens.
 
 ## D-07 — Hosting and fixed infrastructure
 

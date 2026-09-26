@@ -1,0 +1,49 @@
+{
+  "photo": "diya2-03.jpg",
+  "source": "openrouter",
+  "model": "openai/gpt-6-luna",
+  "upstreamModel": "openai/gpt-6-luna",
+  "provider": "OpenAI",
+  "requestedAt": "2026-09-26T15:50:39.729Z",
+  "attempts": 3,
+  "attemptErrors": [
+    "attempt 1: schema invalid — objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.2.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "attempt 2: schema invalid — objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.2.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "attempt 3: schema invalid — objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.2.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\""
+  ],
+  "latencyMs": 1975,
+  "finishReason": "stop",
+  "image": {
+    "byteLength": 92680,
+    "width": 683,
+    "height": 1024,
+    "resized": true,
+    "note": null
+  },
+  "usage": {
+    "promptTokens": 1677,
+    "completionTokens": 1147,
+    "cachedPromptTokens": 1674,
+    "totalTokens": 2824
+  },
+  "billedUsage": {
+    "promptTokens": 5031,
+    "completionTokens": 3949,
+    "cachedPromptTokens": 3348,
+    "totalTokens": 8980
+  },
+  "cost": {
+    "usd": 0.00217628,
+    "usdWithFee": 0.0022959753999999997,
+    "inr": 0.22018404085999999,
+    "measured": true
+  },
+  "rawContent": "{\n  \"schema_version\": \"1\",\n  \"image_quality\": {\n    \"usable\": true,\n    \"reasons\": [],\n    \"looks_like_home_mandir\": false\n  },\n  \"objects\": [\n    {\n      \"observation_id\": \"obs_001\",\n      \"label\": \"oil_lamp\",\n      \"representation_type\": \"physical_object\",\n      \"bounding_box\": {\n        \"x\": 0.388,\n        \"y\": 0.142,\n        \"width\": 0.122,\n        \"height\": 0.082\n      },\n      \"model_confidence\": 0.78,\n      \"verification_required\": true,\n      \"group_id\": null,\n      \"member_labels\": null\n    },\n    {\n      \"observation_id\": \"obs_002\",\n      \"label\": \"bell\",\n      \"representation_type\": \"physical_object\",\n      \"bounding_box\": {\n        \"x\": 0.933,\n        \"y\": 0.623,\n        \"width\": 0.044,\n        \"height\": 0.054\n      },\n      \"model_confidence\": 0.73,\n      \"verification_required\": true,\n      \"group_id\": null,\n      \"member_labels\": null\n    },\n    {\n      \"observation_id\": \"obs_003\",\n      \"label\": \"diya\",\n      \"representation_type\": \"physical_object\",\n      \"bounding_box\": {\n        \"x\": 0.54,\n        \"y\": 0.906,\n        \"width\": 0.072,\n        \"height\": 0.034\n      },\n      \"model_confidence\": 0.75,\n      \"verification_required\": true,\n      \"group_id\": null,\n      \"member_labels\": null\n    }\n  ],\n  \"visual_findings\": []\n}",
+  "parsed": null,
+  "schemaErrors": [
+    "objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.2.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\""
+  ],
+  "contractViolations": []
+}

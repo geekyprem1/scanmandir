@@ -1,0 +1,52 @@
+{
+  "photo": "notmandir-02.jpg",
+  "source": "openrouter",
+  "model": "openai/gpt-6-luna",
+  "upstreamModel": "openai/gpt-6-luna",
+  "provider": "OpenAI",
+  "requestedAt": "2026-09-26T15:54:15.013Z",
+  "attempts": 2,
+  "attemptErrors": [
+    "attempt 1: schema invalid — objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.0.representation_type: Invalid option: expected one of \"statue\"|\"framed_image\"|\"poster\"|\"printed_image\"|\"relief\"|\"shivling\"|\"physical_object\"|\"unknown\"; objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\""
+  ],
+  "latencyMs": 1751,
+  "finishReason": "stop",
+  "image": {
+    "byteLength": 177738,
+    "width": 683,
+    "height": 1024,
+    "resized": true,
+    "note": null
+  },
+  "usage": {
+    "promptTokens": 1677,
+    "completionTokens": 331,
+    "cachedPromptTokens": 1674,
+    "totalTokens": 2008
+  },
+  "billedUsage": {
+    "promptTokens": 3354,
+    "completionTokens": 1114,
+    "cachedPromptTokens": 1674,
+    "totalTokens": 4468
+  },
+  "cost": {
+    "usd": 0.0007417400000000001,
+    "usdWithFee": 0.0007825357,
+    "inr": 0.07504517363,
+    "measured": true
+  },
+  "rawContent": "{\"schema_version\":\"1\",\"image_quality\":{\"usable\":true,\"reasons\":[],\"looks_like_home_mandir\":false},\"objects\":[],\"visual_findings\":[]}",
+  "parsed": {
+    "schema_version": "1",
+    "image_quality": {
+      "usable": true,
+      "reasons": [],
+      "looks_like_home_mandir": false
+    },
+    "objects": [],
+    "visual_findings": []
+  },
+  "schemaErrors": [],
+  "contractViolations": []
+}

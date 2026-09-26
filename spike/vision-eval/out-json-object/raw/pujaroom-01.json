@@ -1,0 +1,67 @@
+{
+  "photo": "pujaroom-01.jpg",
+  "source": "openrouter",
+  "model": "openai/gpt-6-luna",
+  "upstreamModel": "openai/gpt-6-luna",
+  "provider": "OpenAI",
+  "requestedAt": "2026-09-26T15:55:37.730Z",
+  "attempts": 3,
+  "attemptErrors": [
+    "attempt 1: schema invalid — objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.2.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "attempt 2: schema invalid — (root): Invalid input: expected object, received null",
+    "attempt 3: schema invalid — objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.2.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\""
+  ],
+  "latencyMs": 2301,
+  "finishReason": "stop",
+  "image": {
+    "byteLength": 136472,
+    "width": 1024,
+    "height": 768,
+    "resized": true,
+    "note": null
+  },
+  "usage": {
+    "promptTokens": 1754,
+    "completionTokens": 3249,
+    "cachedPromptTokens": 1751,
+    "totalTokens": 5003
+  },
+  "billedUsage": {
+    "promptTokens": 5262,
+    "completionTokens": 10974,
+    "cachedPromptTokens": 3502,
+    "totalTokens": 16236
+  },
+  "cost": {
+    "usd": 0.00569802,
+    "usdWithFee": 0.006011411099999999,
+    "inr": 0.5764943244899999,
+    "measured": true
+  },
+  "rawContent": "{\n  \"schema_version\": \"1\",\n  \"image_quality\": {\n    \"usable\": true,\n    \"reasons\": [],\n    \"looks_like_home_mandir\": true\n  },\n  \"objects\": [\n    {\n      \"observation_id\": \"obs_001\",\n      \"label\": \"ganesh\",\n      \"representation_type\": \"statue\",\n      \"bounding_box\": {\n        \"x\": 0.766,\n        \"y\": 0.052,\n        \"width\": 0.166,\n        \"height\": 0.286\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.82,\n      \"verification_required\": true\n    },\n    {\n      \"observation_id\": \"obs_002\",\n      \"label\": \"unknown_idol\",\n      \"representation_type\": \"statue\",\n      \"bounding_box\": {\n        \"x\": 0.018,\n        \"y\": 0.086,\n        \"width\": 0.061,\n        \"height\": 0.218\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.42,\n      \"verification_required\": true\n    },\n    {\n      \"observation_id\": \"obs_003\",\n      \"label\": \"unknown_idol\",\n      \"representation_type\": \"statue\",\n      \"bounding_box\": {\n        \"x\": 0.077,\n        \"y\": 0.126,\n        \"width\": 0.077,\n        \"height\": 0.16\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.39,\n      \"verification_required\": true\n    },\n    {\n      \"observation_id\": \"obs_004\",\n      \"label\": \"krishna\",\n      \"representation_type\": \"statue\",\n      \"bounding_box\": {\n        \"x\": 0.074,\n        \"y\": 0.249,\n        \"width\": 0.092,\n        \"height\": 0.176\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.56,\n      \"verification_required\": true\n    },\n    {\n      \"observation_id\": \"obs_005\",\n      \"label\": \"unknown_idol\",\n      \"representation_type\": \"statue\",\n      \"bounding_box\": {\n        \"x\": 0.258,\n        \"y\": 0.143,\n        \"width\": 0.094,\n        \"height\": 0.242\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.41,\n      \"verification_required\": true\n    },\n    {\n      \"observation_id\": \"obs_006\",\n      \"label\": \"photo_frame\",\n      \"representation_type\": \"framed_image\",\n      \"bounding_box\": {\n        \"x\": 0.009,\n        \"y\": 0.004,\n        \"width\": 0.106,\n        \"height\": 0.188\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.9,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_007\",\n      \"label\": \"photo_frame\",\n      \"representation_type\": \"framed_image\",\n      \"bounding_box\": {\n        \"x\": 0.103,\n        \"y\": 0.003,\n        \"width\": 0.12,\n        \"height\": 0.201\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.95,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_008\",\n      \"label\": \"photo_frame\",\n      \"representation_type\": \"framed_image\",\n      \"bounding_box\": {\n        \"x\": 0.216,\n        \"y\": 0.012,\n        \"width\": 0.102,\n        \"height\": 0.197\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.94,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_009\",\n      \"label\": \"photo_frame\",\n      \"representation_type\": \"framed_image\",\n      \"bounding_box\": {\n        \"x\": 0.643,\n        \"y\": 0.076,\n        \"width\": 0.055,\n        \"height\": 0.103\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.91,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_010\",\n      \"label\": \"photo_frame\",\n      \"representation_type\": \"framed_image\",\n      \"bounding_box\": {\n        \"x\": 0.595,\n        \"y\": 0.367,\n        \"width\": 0.093,\n        \"height\": 0.188\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.9,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_011\",\n      \"label\": \"photo_frame\",\n      \"representation_type\": \"framed_image\",\n      \"bounding_box\": {\n        \"x\": 0.676,\n        \"y\": 0.449,\n        \"width\": 0.069,\n        \"height\": 0.114\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.88,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_012\",\n      \"label\": \"photo_frame\",\n      \"representation_type\": \"framed_image\",\n      \"bounding_box\": {\n        \"x\": 0.798,\n        \"y\": 0.344,\n        \"width\": 0.052,\n        \"height\": 0.087\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.86,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_013\",\n      \"label\": \"photo_frame\",\n      \"representation_type\": \"framed_image\",\n      \"bounding_box\": {\n        \"x\": 0.88,\n        \"y\": 0.352,\n        \"width\": 0.06,\n        \"height\": 0.09\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.84,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_014\",\n      \"label\": \"oil_lamp\",\n      \"representation_type\": \"lamp\",\n      \"bounding_box\": {\n        \"x\": 0.768,\n        \"y\": 0.222,\n        \"width\": 0.071,\n        \"height\": 0.409\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.78,\n      \"verification_required\": true\n    },\n    {\n      \"observation_id\": \"obs_015\",\n      \"label\": \"oil_lamp\",\n      \"representation_type\": \"lamp\",\n      \"bounding_box\": {\n        \"x\": 0.839,\n        \"y\": 0.457,\n        \"width\": 0.06,\n        \"height\": 0.177\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.68,\n      \"verification_required\": true\n    },\n    {\n      \"observation_id\": \"obs_016\",\n      \"label\": \"mala\",\n      \"representation_type\": \"beads\",\n      \"bounding_box\": {\n        \"x\": 0.662,\n        \"y\": 0.865,\n        \"width\": 0.145,\n        \"height\": 0.105\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.66,\n      \"verification_required\": true\n    },\n    {\n      \"observation_id\": \"obs_017\",\n      \"label\": \"bell\",\n      \"representation_type\": \"ritual_object\",\n      \"bounding_box\": {\n        \"x\": 0.731,\n        \"y\": 0.724,\n        \"width\": 0.067,\n        \"height\": 0.092\n      },\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"model_confidence\": 0.49,\n      \"verification_required\": true\n    }\n  ],\n  \"visual_findings\": [\n    {\n      \"finding_code\": \"crowding\",\n      \"description\": \"Many small figures are arranged closely together on the tiered display.\",\n      \"related_observation_ids\": [\n        \"obs_002\",\n        \"obs_003\",\n        \"obs_004\",\n        \"obs_005\"\n      ],\n      \"verification_required\": false\n    },\n    {\n      \"finding_code\": \"visible_clutter\",\n      \"description\": \"Several framed items and ritual-looking objects are arranged on the floor near the shrine area.\",\n      \"related_observation_ids\": [\n        \"obs_010\",\n        \"obs_011\",\n        \"obs_014\",\n        \"obs_015\"\n      ],\n      \"verification_required\": false\n    }\n  ]\n}",
+  "parsed": null,
+  "schemaErrors": [
+    "objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.2.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.3.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.4.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.5.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.6.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.7.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.8.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.9.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.10.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.11.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.12.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.13.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.13.representation_type: Invalid option: expected one of \"statue\"|\"framed_image\"|\"poster\"|\"printed_image\"|\"relief\"|\"shivling\"|\"physical_object\"|\"unknown\"",
+    "objects.14.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.14.representation_type: Invalid option: expected one of \"statue\"|\"framed_image\"|\"poster\"|\"printed_image\"|\"relief\"|\"shivling\"|\"physical_object\"|\"unknown\"",
+    "objects.15.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.15.representation_type: Invalid option: expected one of \"statue\"|\"framed_image\"|\"poster\"|\"printed_image\"|\"relief\"|\"shivling\"|\"physical_object\"|\"unknown\"",
+    "objects.16.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.16.representation_type: Invalid option: expected one of \"statue\"|\"framed_image\"|\"poster\"|\"printed_image\"|\"relief\"|\"shivling\"|\"physical_object\"|\"unknown\""
+  ],
+  "contractViolations": []
+}

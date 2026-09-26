@@ -1,0 +1,57 @@
+{
+  "photo": "thali-01.jpg",
+  "source": "openrouter",
+  "model": "openai/gpt-6-luna",
+  "upstreamModel": "openai/gpt-6-luna",
+  "provider": "OpenAI",
+  "requestedAt": "2026-09-26T16:00:03.868Z",
+  "attempts": 3,
+  "attemptErrors": [
+    "attempt 1: schema invalid — objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.0.representation_type: Invalid option: expected one of \"statue\"|\"framed_image\"|\"poster\"|\"printed_image\"|\"relief\"|\"shivling\"|\"physical_object\"|\"unknown\"; objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "attempt 2: schema invalid — objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.2.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "attempt 3: schema invalid — objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"; objects.2.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\""
+  ],
+  "latencyMs": 1601,
+  "finishReason": "stop",
+  "image": {
+    "byteLength": 79671,
+    "width": 1024,
+    "height": 683,
+    "resized": true,
+    "note": null
+  },
+  "usage": {
+    "promptTokens": 1677,
+    "completionTokens": 1858,
+    "cachedPromptTokens": 1674,
+    "totalTokens": 3535
+  },
+  "billedUsage": {
+    "promptTokens": 5031,
+    "completionTokens": 5617,
+    "cachedPromptTokens": 3348,
+    "totalTokens": 10648
+  },
+  "cost": {
+    "usd": 0.0030102799999999997,
+    "usdWithFee": 0.0031758453999999993,
+    "inr": 0.30456357385999994,
+    "measured": true
+  },
+  "rawContent": "{\n  \"schema_version\": \"1\",\n  \"image_quality\": {\n    \"usable\": true,\n    \"reasons\": [],\n    \"looks_like_home_mandir\": true\n  },\n  \"objects\": [\n    {\n      \"observation_id\": \"obs_001\",\n      \"label\": \"puja_thali\",\n      \"representation_type\": \"physical_object\",\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"bounding_box\": {\n        \"x\": 0.13,\n        \"y\": 0.36,\n        \"width\": 0.62,\n        \"height\": 0.36\n      },\n      \"model_confidence\": 0.98,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_002\",\n      \"label\": \"diya\",\n      \"representation_type\": \"physical_object\",\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"bounding_box\": {\n        \"x\": 0.24,\n        \"y\": 0.39,\n        \"width\": 0.09,\n        \"height\": 0.09\n      },\n      \"model_confidence\": 0.99,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_003\",\n      \"label\": \"diya\",\n      \"representation_type\": \"physical_object\",\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"bounding_box\": {\n        \"x\": 0.33,\n        \"y\": 0.36,\n        \"width\": 0.1,\n        \"height\": 0.1\n      },\n      \"model_confidence\": 0.99,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_004\",\n      \"label\": \"diya\",\n      \"representation_type\": \"physical_object\",\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"bounding_box\": {\n        \"x\": 0.19,\n        \"y\": 0.45,\n        \"width\": 0.11,\n        \"height\": 0.1\n      },\n      \"model_confidence\": 0.99,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_005\",\n      \"label\": \"diya\",\n      \"representation_type\": \"physical_object\",\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"bounding_box\": {\n        \"x\": 0.21,\n        \"y\": 0.49,\n        \"width\": 0.1,\n        \"height\": 0.1\n      },\n      \"model_confidence\": 0.99,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_006\",\n      \"label\": \"diya\",\n      \"representation_type\": \"physical_object\",\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"bounding_box\": {\n        \"x\": 0.29,\n        \"y\": 0.49,\n        \"width\": 0.11,\n        \"height\": 0.11\n      },\n      \"model_confidence\": 0.99,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_007\",\n      \"label\": \"flowers\",\n      \"representation_type\": \"flower_arrangement\",\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"bounding_box\": {\n        \"x\": 0.34,\n        \"y\": 0.43,\n        \"width\": 0.34,\n        \"height\": 0.21\n      },\n      \"model_confidence\": 0.98,\n      \"verification_required\": false\n    },\n    {\n      \"observation_id\": \"obs_008\",\n      \"label\": \"unknown\",\n      \"representation_type\": \"physical_object\",\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"bounding_box\": {\n        \"x\": 0.53,\n        \"y\": 0.56,\n        \"width\": 0.16,\n        \"height\": 0.1\n      },\n      \"model_confidence\": 0.35,\n      \"verification_required\": true\n    },\n    {\n      \"observation_id\": \"obs_009\",\n      \"label\": \"unknown\",\n      \"representation_type\": \"physical_object\",\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"bounding_box\": {\n        \"x\": 0.39,\n        \"y\": 0.6,\n        \"width\": 0.11,\n        \"height\": 0.08\n      },\n      \"model_confidence\": 0.3,\n      \"verification_required\": true\n    },\n    {\n      \"observation_id\": \"obs_010\",\n      \"label\": \"unknown\",\n      \"representation_type\": \"physical_object\",\n      \"group_id\": null,\n      \"member_labels\": null,\n      \"bounding_box\": {\n        \"x\": 0.45,\n        \"y\": 0.37,\n        \"width\": 0.08,\n        \"height\": 0.1\n      },\n      \"model_confidence\": 0.3,\n      \"verification_required\": true\n    }\n  ],\n  \"visual_findings\": [\n    {\n      \"finding_code\": \"flame_near_combustible\",\n      \"description\": \"Several lit lamps are arranged close to flowers on the tray.\",\n      \"related_observation_ids\": [\n        \"obs_002\",\n        \"obs_003\",\n        \"obs_004\",\n        \"obs_005\",\n        \"obs_006\",\n        \"obs_007\"\n      ],\n      \"verification_required\": false\n    },\n    {\n      \"finding_code\": \"crowding\",\n      \"description\": \"Multiple lamps, flowers, and small items are closely arranged on the tray.\",\n      \"related_observation_ids\": [\n        \"obs_001\",\n        \"obs_002\",\n        \"obs_003\",\n        \"obs_004\",\n        \"obs_005\",\n        \"obs_006\",\n        \"obs_007\",\n        \"obs_008\",\n        \"obs_009\",\n        \"obs_010\"\n      ],\n      \"verification_required\": false\n    }\n  ]\n}",
+  "parsed": null,
+  "schemaErrors": [
+    "objects.0.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.1.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.2.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.3.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.4.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.5.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.6.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.6.representation_type: Invalid option: expected one of \"statue\"|\"framed_image\"|\"poster\"|\"printed_image\"|\"relief\"|\"shivling\"|\"physical_object\"|\"unknown\"",
+    "objects.7.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.8.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\"",
+    "objects.9.category: Invalid option: expected one of \"deity_representation\"|\"puja_object\"|\"other\""
+  ],
+  "contractViolations": []
+}
