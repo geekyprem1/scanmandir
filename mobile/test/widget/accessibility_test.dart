@@ -10,7 +10,6 @@ import 'package:scan_my_mandir/features/onboarding/application/onboarding_contro
 import 'package:scan_my_mandir/features/report/presentation/report_overview_screen.dart';
 import 'package:scan_my_mandir/features/scan/presentation/context_questions_screen.dart';
 import 'package:scan_my_mandir/features/scan/presentation/detected_items_screen.dart';
-import 'package:scan_my_mandir/features/scan/presentation/scan_progress_screen.dart';
 
 import '../support/fake_auth_service.dart';
 import '../support/fake_http_transport.dart';
@@ -97,10 +96,10 @@ void main() {
 
       await pumpApp(tester);
 
-      await tapAt(tester, find.widgetWithText(ActionCard, 'Scan My Mandir'));
-      expect(tester.takeException(), isNull);
-
-      await tapAt(tester, find.text('Continue'));
+      await tapAt(
+        tester,
+        find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
+      );
       expect(tester.takeException(), isNull);
 
       await tapAt(tester, find.text('Continue'));
@@ -125,8 +124,10 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await pumpApp(tester);
-    await tapAt(tester, find.widgetWithText(ActionCard, 'Scan My Mandir'));
-    await tapAt(tester, find.text('Continue'));
+    await tapAt(
+      tester,
+      find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
+    );
 
     // IconButton tooltips reach assistive technology as the node's tooltip.
     expect(
@@ -146,8 +147,10 @@ void main() {
   ) async {
     await pumpApp(tester);
 
-    await tapAt(tester, find.widgetWithText(ActionCard, 'Scan My Mandir'));
-    await tapAt(tester, find.text('Continue'));
+    await tapAt(
+      tester,
+      find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
+    );
     await tapAt(tester, find.text('Continue'));
     await tapAt(tester, find.text('View report'));
     await scrollTo(tester, find.text('Two similar deity images'));
@@ -167,10 +170,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(DetectedItemsScreen), findsOneWidget);
 
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-    expect(find.byType(ScanProgressScreen), findsOneWidget);
-
+    // The fixture journey starts at the preview entry point, so this lands on Home.
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.byType(HomeScreen), findsOneWidget);
@@ -181,8 +181,10 @@ void main() {
   ) async {
     await pumpApp(tester);
 
-    await tapAt(tester, find.widgetWithText(ActionCard, 'Scan My Mandir'));
-    await tapAt(tester, find.text('Continue'));
+    await tapAt(
+      tester,
+      find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
+    );
     await tapAt(tester, find.byTooltip('Confirm').first);
     expect(find.text('Confirmed'), findsOneWidget);
 

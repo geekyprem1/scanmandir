@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/session_controller.dart';
 import '../../../core/model/failure.dart';
 import '../../../core/model/ui_state.dart';
 import '../../../core/model/uuid.dart';
@@ -91,6 +92,12 @@ class ScanSubmissionController extends Notifier<UiState<ScanSubmission>> {
     return const UiLoading<ScanSubmission>();
   }
 
+  /// Whether a submission has been started, as opposed to showing the initial state.
+  ///
+  /// The two look alike in [UiLoading], and a screen has to tell them apart: one is
+  /// "nothing yet, offer a way to start", the other is "work in progress".
+  bool get hasStarted => _photo != null;
+
   /// Uploads one photo and follows its scan.
   Future<void> submit({
     required Uint8List photo,
@@ -131,6 +138,27 @@ class ScanSubmissionController extends Notifier<UiState<ScanSubmission>> {
     _setState(const UiLoading<ScanSubmission>());
 
     try {
+      // A scan needs a session (PRD section 7). The first one creates a guest session on
+      // demand — not at launch, and not for someone who only opened the app.
+      if (ref.read(sessionControllerProvider) is! SessionSignedIn) {
+        await ref.read(sessionControllerProvider.notifier).startGuestSession();
+        if (_disposed) return;
+        final SessionUiState session = ref.read(sessionControllerProvider);
+        if (session is! SessionSignedIn) {
+          _setState(
+            errorStateFor<ScanSubmission>(
+              session is SessionFailed
+                  ? session.failure
+                  : const Failure(
+                      kind: FailureKind.unauthenticated,
+                      code: 'UNAUTHENTICATED',
+                    ),
+            ),
+          );
+          return;
+        }
+      }
+
       final ScanSnapshot created = await api.create(
         idempotencyKey: idempotencyKey,
       );

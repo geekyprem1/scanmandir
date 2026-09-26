@@ -48,12 +48,15 @@ Future<void> tapAt(WidgetTester tester, Finder finder) async {
 }
 
 /// Walks from Home to the report overview.
+///
+/// The journey after capture is still a fixture (P2-05); scanning itself is real, so the
+/// fixture walk starts at the preview entry point rather than at the camera.
 Future<void> walkToReport(
   WidgetTester tester, {
   String continueLabel = 'Continue',
+  String previewLabel = 'Journey preview (sample data)',
 }) async {
-  await tapAt(tester, find.widgetWithText(ActionCard, 'Scan My Mandir'));
-  await tapAt(tester, find.text(continueLabel));
+  await tapAt(tester, find.widgetWithText(ActionCard, previewLabel));
   await tapAt(tester, find.text(continueLabel));
   await tapAt(tester, find.text('View report'));
 }
@@ -64,7 +67,10 @@ void main() {
   ) async {
     await pumpJourney(tester);
 
-    await tapAt(tester, find.widgetWithText(ActionCard, 'Scan My Mandir'));
+    await tapAt(
+      tester,
+      find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
+    );
 
     // Every fixture screen says what it is.
     expect(
@@ -73,9 +79,6 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('Photo received'), findsOneWidget);
-
-    await tapAt(tester, find.text('Continue'));
     expect(find.text('Detected items'), findsOneWidget);
 
     await tapAt(tester, find.text('Continue'));
@@ -93,8 +96,10 @@ void main() {
   ) async {
     await pumpJourney(tester);
 
-    await tapAt(tester, find.widgetWithText(ActionCard, 'Scan My Mandir'));
-    await tapAt(tester, find.text('Continue'));
+    await tapAt(
+      tester,
+      find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
+    );
 
     await tapAt(tester, find.byTooltip('Confirm').first);
     expect(find.text('Confirmed'), findsOneWidget);
@@ -113,8 +118,10 @@ void main() {
   ) async {
     await pumpJourney(tester);
 
-    await tapAt(tester, find.widgetWithText(ActionCard, 'Scan My Mandir'));
-    await tapAt(tester, find.text('Continue'));
+    await tapAt(
+      tester,
+      find.widgetWithText(ActionCard, 'Journey preview (sample data)'),
+    );
 
     for (int i = 0; i < 4; i++) {
       await tapAt(tester, find.byTooltip('Remove').first);
@@ -174,15 +181,16 @@ void main() {
   testWidgets('the journey walks in Hindi', (WidgetTester tester) async {
     await pumpJourney(tester, hindi: true);
 
-    await tapAt(tester, find.widgetWithText(ActionCard, 'मंदिर स्कैन करें'));
+    await tapAt(
+      tester,
+      find.widgetWithText(ActionCard, 'यात्रा पूर्वावलोकन (नमूना डेटा)'),
+    );
     expect(
       find.text(
         'डेवलपमेंट पूर्वावलोकन, नमूना डेटा के साथ — यह वास्तविक स्कैन परिणाम नहीं है।',
       ),
       findsOneWidget,
     );
-
-    await tapAt(tester, find.text('जारी रखें'));
     expect(find.text('पहचानी गई वस्तुएँ'), findsOneWidget);
 
     await tapAt(tester, find.text('जारी रखें'));

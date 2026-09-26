@@ -30,14 +30,6 @@ class FixtureQuestion {
 }
 
 abstract final class JourneyFixture {
-  /// Progress stages from PRD section 34: meaningful stage names, never a fabricated
-  /// percentage.
-  static List<String> stages(AppLocalizations l10n) => <String>[
-    l10n.scanStageReceived,
-    l10n.scanStageIdentifying,
-    l10n.scanStageChecking,
-  ];
-
   static List<FixtureItem> detectedItems(AppLocalizations l10n) =>
       <FixtureItem>[
         FixtureItem(

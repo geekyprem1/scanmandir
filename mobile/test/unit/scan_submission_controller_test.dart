@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,79 +11,10 @@ import 'package:scan_my_mandir/features/scan/application/scan_submission_control
 
 import '../support/fake_auth_service.dart';
 import '../support/fake_http_transport.dart';
+import '../support/fake_scan_server.dart';
 
-const String scanId = '11111111-2222-3333-4444-555555555555';
-final Uint8List photo = Uint8List.fromList(<int>[137, 80, 78, 71]);
-
-HttpOutcome answer(int status, Map<String, Object?> body) =>
-    HttpOutcome(statusCode: status, body: jsonEncode(body));
-
-Map<String, Object?> scanBody(String status, {String? failedStage}) =>
-    <String, Object?>{
-      'id': scanId,
-      'status': status,
-      'imageRevision': 1,
-      'inputRevision': 0,
-      'failedStage': failedStage,
-      'nextAction': 'wait',
-    };
-
-/// The four answers a scan submission needs, plus the polling loop.
-///
-/// [statuses] is consumed one per status read; the last entry repeats, so a test states
-/// only the transition it cares about.
-class ScanServer {
-  ScanServer(this.statuses, {this.createStatus = 201, this.createBody});
-
-  final List<String> statuses;
-  final int createStatus;
-  final Map<String, Object?>? createBody;
-
-  int creates = 0;
-  int uploadUrls = 0;
-  int uploads = 0;
-  int completes = 0;
-  int reads = 0;
-
-  Future<HttpOutcome?> respond(RecordedCall call) async {
-    if (call.method == 'POST' && call.path == '/v1/scans') {
-      creates++;
-      return answer(
-        createStatus,
-        createBody ??
-            (createStatus == 201
-                ? scanBody('awaiting_upload')
-                : <String, Object?>{
-                    'error': <String, Object?>{'code': 'QUOTA_EXCEEDED'},
-                  }),
-      );
-    }
-    if (call.method == 'POST' && call.path.endsWith('/upload-url')) {
-      uploadUrls++;
-      return answer(200, <String, Object?>{
-        'uploadUrl': 'http://127.0.0.1:3000/v1/dev-storage?key=staging%2Fone',
-        'stagingKey': 'scans/u/$scanId/r1/staging/one',
-        'requiredHeaders': <String, Object?>{'content-type': 'image/jpeg'},
-      });
-    }
-    if (call.method == 'PUT') {
-      uploads++;
-      return const HttpOutcome(statusCode: 204, body: '');
-    }
-    if (call.method == 'POST' && call.path.endsWith('/upload-complete')) {
-      completes++;
-      // Completion always leaves the scan queued: what happens next is the worker's
-      // business, which is what the polls observe.
-      return answer(200, scanBody('queued'));
-    }
-    if (call.method == 'GET' && call.path.startsWith('/v1/scans/')) {
-      reads++;
-      final int index = (reads - 1).clamp(0, statuses.length - 1);
-      return answer(200, scanBody(statuses[index]));
-    }
-    return null;
-  }
-}
+const String scanId = testScanId;
+final Uint8List photo = testPhotoBytes();
 
 void main() {
   ProviderContainer containerFor(

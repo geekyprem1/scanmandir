@@ -265,6 +265,15 @@ Storage is live as well: the backend's Supabase driver creates the private `mand
 
 Why this shape: a bounded, upright, metadata-free derivative is what makes per-scan cost predictable and keeps D-08's data minimalization claim true. The open half is quality: 1024 px may be too coarse for small attributes (material, hidden damage, jewellery detail), and the vision evaluation (P0-05, D-04) is what should settle it. Until then it is a working default, not a measured one.
 
+## D-18 Capture: the system camera and picker, not an in-app viewfinder
+
+**Decided for launch.** Capture uses `image_picker`, which hands off to the system camera app and the Android photo picker, rather than the `camera` package's in-app preview.
+
+- The app declares no camera permission at all. The system camera app owns that consent, so a refusal is the system's to explain and this app never holds a permission it does not use. A device with no camera stays installable: the camera feature is declared optional and the gallery path works.
+- The gallery fallback P4-02 asks for is not extra work here — it is the other button on the same screen.
+- The boundary is `core/platform/media_picker.dart`, so the picker is fakeable in tests and an in-app viewfinder with preview and crop (the rest of P4-01) can arrive later without the scan flow changing.
+- What this costs, stated plainly: no framing guidance, no crop before upload, and the photo arrives re-encoded by the picker (quality 90), so the bytes we store are not bit-identical to what the camera produced. Acceptable while the vision stage only needs a bounded, upright derivative (D-17). If evaluation shows small details matter, in-app capture with a lossless path is the follow-up.
+
 ## Open Phase 0 items
 
 | Task | Blocking | Entry |

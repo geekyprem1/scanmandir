@@ -27,6 +27,11 @@ dependencies:
   flutter_secure_storage: 11.2.0
   # Declarative routing, so the scan flow's states map onto routes predictably.
   go_router: 17.5.0
+  # Camera capture and gallery import (TASKS P4-01). Behind a platform interface in
+  # core/platform, so no feature code imports it. The system camera and the system picker
+  # are used rather than an in-app viewfinder: fewer permissions, and the gallery fallback
+  # comes free when the camera is refused (TASKS P4-02).
+  image_picker: 1.2.3
   # Pinned to what flutter_localizations requires in this Flutter version.
   intl: 0.20.2
   # Identity: anonymous guest sessions upgraded in place (docs/decisions.md D-15). The

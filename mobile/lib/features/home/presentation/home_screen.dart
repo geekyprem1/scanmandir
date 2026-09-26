@@ -52,14 +52,14 @@ class HomeScreen extends ConsumerWidget {
               label: l10n.homeScanAction,
               icon: Icons.photo_camera_outlined,
               emphasised: true,
-              onTap: showUnbuilt ? () => context.push('/scan') : null,
+              onTap: () => context.push('/upload'),
             ),
             const SizedBox(height: Insets.sm),
             if (showUnbuilt) ...<Widget>[
               ActionCard(
-                label: l10n.homeUploadAction,
-                icon: Icons.photo_library_outlined,
-                onTap: () => context.push('/upload'),
+                label: l10n.homePreviewJourneyAction,
+                icon: Icons.science_outlined,
+                onTap: () => context.push('/scan/detected'),
               ),
               const SizedBox(height: Insets.sm),
               ActionCard(

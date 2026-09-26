@@ -16,7 +16,6 @@
     "description": "Primary call to action on the home screen."
   },
 
-  "homeUploadAction": "Upload Photo",
   "homeReportsAction": "My Reports",
   "homeMandirProfileAction": "Mandir Profile",
   "homeSettingsAction": "Settings",
@@ -101,12 +100,25 @@
   },
 
   "scanProgressTitle": "Scan progress",
-  "scanStageReceived": "Photo received",
   "scanStageIdentifying": "Identifying visible objects",
-  "scanStageChecking": "Checking arrangement",
-  "@scanStageChecking": {
-    "description": "Stage names from PRD section 34. Meaningful stages only; never a fabricated percentage."
+  "scanStageUploading": "Uploading your photo",
+  "@scanStageUploading": {
+    "description": "Stage names from PRD section 34. Meaningful stages only, never a fabricated percentage: the server reports states, not progress, so the app shows which state it is in."
   },
+  "scanStagePreparingReport": "Preparing your report",
+  "scanStageReady": "Ready for your review",
+
+  "captureTitle": "Your mandir photo",
+  "captureIntro": "Take a photo or choose one from your gallery. Only the photo you pick is uploaded.",
+  "captureFromCamera": "Take a photo",
+  "captureFromGallery": "Choose from gallery",
+  "capturePermissionDenied": "Camera access was refused. You can still choose a photo from your gallery.",
+  "captureUnavailable": "This device has no camera or gallery available.",
+  "captureFailed": "That photo could not be opened. Try another one.",
+  "scanNothingTitle": "No scan in progress",
+  "scanNothingDetail": "Start one by choosing a photo of your mandir.",
+  "scanNothingAction": "Choose a photo",
+  "homePreviewJourneyAction": "Journey preview (sample data)",
 
   "actionContinue": "Continue",
 

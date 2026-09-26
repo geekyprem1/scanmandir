@@ -7,6 +7,7 @@ import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/report/presentation/finding_detail_screen.dart';
 import '../features/report/presentation/report_overview_screen.dart';
 import '../features/report/presentation/source_detail_screen.dart';
+import '../features/scan/presentation/capture_screen.dart';
 import '../features/scan/presentation/context_questions_screen.dart';
 import '../features/scan/presentation/detected_items_screen.dart';
 import '../features/scan/presentation/scan_progress_screen.dart';
@@ -39,12 +40,15 @@ GoRouter createRouter({
         return null;
       }
       final String path = state.uri.path;
-      return path == '/scan' ||
-              path.startsWith('/scan/') ||
-              path == '/report' ||
-              path.startsWith('/report/')
-          ? '/'
-          : null;
+      // Scanning is real and stays reachable in every flavor. What is guarded is the part
+      // of the journey that still renders fixtures: the detected-items and context
+      // screens, and every report screen.
+      final bool isFixtureRoute =
+          path == '/report' ||
+          path.startsWith('/report/') ||
+          path == '/scan/detected' ||
+          path == '/scan/context';
+      return isFixtureRoute ? '/' : null;
     },
     routes: <RouteBase>[
       GoRoute(path: '/', builder: (_, _) => const HomeScreen()),
@@ -55,7 +59,8 @@ GoRouter createRouter({
       GoRoute(path: '/disclaimer', builder: (_, _) => const DisclaimerScreen()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
 
-      // The journey, as shells over development fixtures (P2-05).
+      // The journey. Capture and progress are real; the screens after them still render
+      // development fixtures (P2-05) until the vision and rules pipeline lands.
       GoRoute(
         path: '/scan',
         builder: (_, _) => const ScanProgressScreen(),
@@ -70,6 +75,7 @@ GoRouter createRouter({
           ),
         ],
       ),
+      GoRoute(path: '/upload', builder: (_, _) => const CaptureScreen()),
       GoRoute(
         path: '/report',
         builder: (_, _) => const ReportOverviewScreen(),
@@ -87,11 +93,7 @@ GoRouter createRouter({
         ],
       ),
 
-      // Phase 4 onward. Placeholders, deliberately labelled.
-      GoRoute(
-        path: '/upload',
-        builder: (_, _) => const _Placeholder(routeLabel: 'Upload Photo'),
-      ),
+      // Phase 8 onward. Placeholders, deliberately labelled.
       GoRoute(
         path: '/reports',
         builder: (_, _) => const _Placeholder(routeLabel: 'My Reports'),

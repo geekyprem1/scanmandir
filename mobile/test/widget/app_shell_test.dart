@@ -61,11 +61,13 @@ void main() {
   ) async {
     await pumpApp(tester, flavor: AppFlavor.production);
 
-    // Settings is real; the rest are not built yet and must not be reachable.
-    expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Upload Photo'), findsNothing);
+    // Scanning is real, so its action is offered. The fixture journey preview and the
+    // unbuilt features are not: a production build must not lead to a sample report.
+    expect(find.text('Scan My Mandir'), findsWidgets);
+    expect(find.text('Journey preview (sample data)'), findsNothing);
     expect(find.text('My Reports'), findsNothing);
     expect(find.text('Mandir Profile'), findsNothing);
+    expect(find.text('Settings'), findsOneWidget);
   });
 
   testWidgets('an unbuilt route is clearly labelled, never shown as a result', (

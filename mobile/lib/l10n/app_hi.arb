@@ -6,7 +6,6 @@
   "homeTagline": "अपने मंदिर को समझें, परंपरा के साथ।",
 
   "homeScanAction": "मंदिर स्कैन करें",
-  "homeUploadAction": "फ़ोटो अपलोड करें",
   "homeReportsAction": "मेरी रिपोर्ट",
   "homeMandirProfileAction": "मंदिर प्रोफ़ाइल",
   "homeSettingsAction": "सेटिंग्स",
@@ -66,9 +65,22 @@
   "fixtureNotice": "डेवलपमेंट पूर्वावलोकन, नमूना डेटा के साथ — यह वास्तविक स्कैन परिणाम नहीं है।",
 
   "scanProgressTitle": "स्कैन प्रगति",
-  "scanStageReceived": "फ़ोटो प्राप्त हुई",
   "scanStageIdentifying": "दिखने वाली वस्तुओं की पहचान",
-  "scanStageChecking": "व्यवस्था की जाँच",
+  "scanStageUploading": "फ़ोटो अपलोड हो रही है",
+  "scanStagePreparingReport": "रिपोर्ट तैयार हो रही है",
+  "scanStageReady": "समीक्षा के लिए तैयार",
+
+  "captureTitle": "आपके मंदिर की फ़ोटो",
+  "captureIntro": "फ़ोटो लें या गैलरी से चुनें। सिर्फ़ आपकी चुनी हुई फ़ोटो ही अपलोड होती है।",
+  "captureFromCamera": "फ़ोटो लें",
+  "captureFromGallery": "गैलरी से चुनें",
+  "capturePermissionDenied": "कैमरे की अनुमति नहीं मिली। आप गैलरी से फ़ोटो चुन सकते हैं।",
+  "captureUnavailable": "इस डिवाइस पर कैमरा या गैलरी उपलब्ध नहीं है।",
+  "captureFailed": "यह फ़ोटो खोली नहीं जा सकी। कोई दूसरी फ़ोटो आज़माएँ।",
+  "scanNothingTitle": "कोई स्कैन चालू नहीं है",
+  "scanNothingDetail": "अपने मंदिर की फ़ोटो चुनकर शुरू करें।",
+  "scanNothingAction": "फ़ोटो चुनें",
+  "homePreviewJourneyAction": "यात्रा पूर्वावलोकन (नमूना डेटा)",
 
   "actionContinue": "जारी रखें",
 

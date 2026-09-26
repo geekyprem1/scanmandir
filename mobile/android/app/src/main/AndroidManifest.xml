@@ -4,6 +4,12 @@
          here explicitly. -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <!-- The camera is optional: a device without one can still import a photo from the
+         gallery, so declaring it as required would wrongly filter those devices out of
+         the store. The camera app is reached through an intent, which is why no camera
+         permission is requested here — the system camera owns that decision. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+
     <application
         android:label="Scan My Mandir"
         android:name="${applicationName}"
