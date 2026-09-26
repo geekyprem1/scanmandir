@@ -1,6 +1,6 @@
 # Scan My Mandir — Implementation Tasks
 
-**Version:** 1.11  
+**Version:** 1.12  
 **Updated:** 26 September 2026  
 **Stack:** Flutter/Dart, TypeScript/Fastify, PostgreSQL, private object storage  
 **Release target:** Android first; iOS later
@@ -55,8 +55,8 @@
 
 - [ ] P0-01 — Confirm Android-first launch scope. Compass and billing are currently included in the public MVP; update PRD and architecture together if explicitly deferred.
 - [ ] P0-02 — Select and pin Flutter/Dart SDK, one state-management approach, navigation, HTTP, SQLite, secure-storage, camera/gallery, and sensor integrations after checking maintained platform support. *Partly done: SDK, state management, navigation and localization are pinned in `docs/decisions.md` D-01 and D-12. SQLite, secure storage, camera/gallery and sensors are still unchosen; interfaces for them exist in `mobile/lib/core/platform/` with no implementations.*
-- [ ] P0-03 — Choose managed identity provider and guest-to-account upgrade methods.
-- [ ] P0-04 — Choose hosting region, PostgreSQL hosting, object storage, and secret management; record operating budget.
+- [ ] P0-03 — Choose managed identity provider and guest-to-account upgrade methods. *Proposed default recorded: `docs/decisions.md` D-15 — Supabase Auth with anonymous guests upgraded in place, Google Sign-In and email magic link at MVP, phone OTP deferred behind TRAI DLT registration. Needs confirmation before P3-01.*
+- [ ] P0-04 — Choose hosting region, PostgreSQL hosting, object storage, and secret management; record operating budget. *Proposed default recorded: `docs/decisions.md` D-16 — Supabase Pro in Mumbai for Postgres, Auth and Storage; DigitalOcean App Platform in Bangalore for the API and worker containers; roughly $35–40/month fixed before domain and Play fees. A production Dockerfile is the missing prerequisite. Needs confirmation before provisioning.*
 - [ ] P0-05 — Evaluate vision providers using representative mandir photos; record quality, latency, cost, structured-output support, and data retention. *Harness built and dry-run verified at `spike/vision-eval/`. Blocked on real photos and an API key. Published-rate cost estimate recorded in `docs/decisions.md` D-05; no quality, latency or cost has been measured.*
 - [ ] P0-06 — Define supported launch labels, deity-group counting, initial traditions, source reviewers, and publication ownership.
 - [ ] P0-07 — Confirm retention periods, save-photo behavior, anonymous-account recovery messaging, and deletion deadlines.

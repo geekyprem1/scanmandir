@@ -92,11 +92,11 @@ At roughly ₹0.10–0.20 per scan against the ₹16 per scan implied by the pri
 
 ## D-07 — Hosting and fixed infrastructure
 
-**Status:** Open
+**Status:** Proposed — see D-16
 **Relates to:** P0-04
 **Must be settled before:** infrastructure provisioning
 
-Unresolved: hosting vendor and region, managed PostgreSQL, object storage, secret manager.
+Unresolved: hosting vendor and region, managed PostgreSQL, object storage, secret manager. A proposed stack with costs is in D-16.
 
 This is now understood to be the **dominant cost driver**, not the AI. Managed PostgreSQL, an API container, a worker container, object storage, and a secret manager cost the same whether 10 or 10,000 scans run per month. At low volume the fixed monthly cost per scan can exceed the AI cost by two orders of magnitude. Google Play's service fee is also a far larger deduction than inference.
 
@@ -191,14 +191,71 @@ Development uses **5442** and integration tests use **5443**, not the defaults. 
 
 An application ID cannot be changed once published to Play, so P12-01 must confirm it before the first upload.
 
+## D-15 — Identity provider and account upgrade
+
+**Status:** Proposed — needs confirmation before P3-01
+**Relates to:** P0-03, P3-01, P3-02
+**Must be settled before:** identity integration in Phase 3
+
+Recommendation: **Supabase Auth**, in a project pinned to the Mumbai region (D-16).
+
+Why it fits the journey rather than fighting it:
+
+- **Anonymous guests are first-class.** `signInAnonymously` issues a real session and JWT with an `is_anonymous` claim, so the first scan needs no account (PRD section 7) without inventing a parallel guest-token scheme.
+- **Upgrade preserves history.** Adding and verifying an email converts the anonymous user in place, and an OAuth identity links via `linkIdentity`; the user id does not change, so owned records keep pointing at the same person (P3-02).
+- **Verification stays ours.** Asymmetric signing keys (ES256) publish a JWKS endpoint, so the Fastify backend verifies tokens locally with cached public keys and survives key rotation without redeploying (P3-01).
+
+MVP upgrade methods: **Google Sign-In first** — native on Android, no per-message cost, no telecom compliance — and **email magic link second**. **Phone OTP is deliberately deferred**: sending OTP SMS in India requires TRAI DLT registration (entity, sender header, approved content templates), which is a compliance project the MVP does not need. Supabase phone auth can be added later without changing the account model or the user ids.
+
+Notes that must survive implementation:
+
+- The service-role key never leaves the server; the app ships only the publishable/anon key.
+- Anonymous sign-in is an abuse surface: enable CAPTCHA on it, and pair it with the P3-07 rate limits and the quota ledger.
+- Linking an anonymous user to an **existing** account is a conflict case, not an automatic merge. Resolve it with an explicit rule (P3-02 forbids merging unverified identities silently).
+
+Alternatives considered:
+
+- **Firebase Auth** — equally capable anonymous accounts and credential linking, but brings no Postgres or object storage, and its free tier was tightened in 2026. Kept as the fallback if Google's stack is preferred.
+- **Clerk / Auth0** — designed around permanent accounts first; guests are not a first-class concept.
+- **Self-hosted (GoTrue or a custom OTP service)** — full control, but we would own the PII handling and the SMS compliance path ourselves. Not worth it at this size.
+
+Not yet done: nothing has been integrated, no project exists yet, and current pricing/limits must be re-checked at provisioning time (free projects pause when inactive, so production needs the paid plan).
+
+## D-16 — Hosting, database, storage, and secrets
+
+**Status:** Proposed — needs confirmation before infrastructure provisioning (answers D-07)
+**Relates to:** P0-04, P11-01
+
+Recommendation: two vendors, both with an India region.
+
+1. **Supabase Pro, Mumbai (`ap-south-1`)** — PostgreSQL, Auth (D-15), and private object storage with signed URLs; the region choice decides where the data physically lives, which fits the India-first audience and the DPDP conversation (P0-09).
+2. **DigitalOcean App Platform, Bangalore (`BLR1`)** — the two long-running containers (API and worker) from one image with different commands, behind managed TLS, with encrypted environment variables as the MVP's secret store. App Platform is available in BLR; **Fly.io has no India region** (closest is Singapore), which rules it out for an India-first launch; Railway and Render have no India regions either.
+
+Rough fixed cost: about **$25/mo** (Supabase Pro) + **$10–15/mo** (two small containers) before the domain and Play Store fees. Fixed monthly cost, not per-scan cost, stays the dominant line — D-07's original point, unchanged.
+
+Required before provisioning, not yet built:
+
+- A **production Dockerfile for the backend** — none exists; API and worker share an image and differ by command.
+- A deploy path from GitHub (where CI already runs).
+- A decision, easy to reverse, on whether the worker runs as a second App Platform service (recommended) or as a scheduled process.
+
+Alternatives considered:
+
+- **All-in on AWS `ap-south-1`** — most control, most operations (ECS/RDS/S3/Secrets Manager), and no identity product that treats guests as first-class.
+- **GCP `asia-south1`** — Cloud Run + Cloud SQL + GCS + Secret Manager + Identity Platform is a coherent single-vendor India stack; heavier setup, and a polling worker needs a minimum instance, which erases most of the scale-to-zero saving.
+- **DigitalOcean for everything** (managed PostgreSQL and Spaces in BLR) — viable and single-vendor, but identity then needs a second provider anyway; Supabase keeps database, auth, and storage in one console.
+- **Fly.io / Railway / Render** — no India region.
+
+Verify before committing: current Supabase Pro limits (database size, storage, egress) and current App Platform BLR pricing. Both change.
+
 ## Open Phase 0 items
 
 | Task | Blocking | Entry |
 |---|---|---|
 | P0-01 | Launch scope confirmation | D-09 |
 | P0-02 | Package pinning beyond SDK | D-01 |
-| P0-03 | Identity provider | not started |
-| P0-04 | Hosting, storage, secrets, budget | D-07 |
+| P0-03 | Identity provider | D-15 (proposed) |
+| P0-04 | Hosting, storage, secrets, budget | D-16 (proposed) |
 | P0-05 | Vision provider quality and data handling | D-04, D-08 |
 | P0-06 | Label catalog, traditions, source reviewers | D-11 |
 | P0-07 | Retention, save-photo, recovery messaging | not started |
