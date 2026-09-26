@@ -32,6 +32,16 @@ const EnvSchema = z.object({
   WORKER_BATCH_SIZE: z.coerce.number().int().positive().default(5),
   WORKER_LEASE_MS: z.coerce.number().int().positive().default(60_000),
   JOB_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
+
+  /**
+   * Supabase project (docs/decisions.md D-15). Access tokens are verified against the
+   * project's JWKS endpoint, so a request without this configuration cannot be
+   * authenticated and the process refuses to start rather than failing open.
+   */
+  SUPABASE_URL: z.string().url(),
+  SUPABASE_JWT_AUDIENCE: z.string().min(1).default('authenticated'),
+  /** Defaults to <SUPABASE_URL>/auth/v1. */
+  SUPABASE_JWT_ISSUER: z.string().url().optional(),
 });
 
 export type AppConfig = z.infer<typeof EnvSchema> & {

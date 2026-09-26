@@ -1,25 +1,33 @@
 import { randomUUID } from 'node:crypto';
 import Fastify from 'fastify';
+import type { JWTVerifyGetKey } from 'jose';
 import { getConfig } from '../shared/config.js';
 import { getLogger } from '../shared/logger.js';
 import { AppError, ERROR_CODES, toErrorResponse } from '../shared/errors.js';
+import { registerAuth } from './plugins/auth.js';
 import { registerHealthRoutes } from './routes/health.js';
 import { registerDevStorageRoutes } from './routes/dev-storage.js';
+import { registerMeRoutes } from './routes/me.js';
 import type { AppServer } from './types.js';
+
+export interface BuildServerOptions {
+  /** Tests inject a local key set; production verifies against the project's JWKS. */
+  authKeyResolver?: JWTVerifyGetKey | undefined;
+}
 
 /**
  * Builds the API without listening, so tests can drive it through server.inject().
  *
- * NOT YET PRESENT, and required before this serves any real user data:
- *   - authentication and session verification (P3-01)
+ * Session verification exists (P3-01). NOT YET PRESENT, and required before this serves
+ * any real user data:
  *   - per-object ownership checks (P3-04)
  *   - rate limiting and abuse controls (P3-07)
  *
- * Every route registered today is either a health probe or a development-only storage
- * endpoint guarded by an HMAC signature. Do not add a route that reads or writes user
- * data until the three items above exist.
+ * Every route registered today is a health probe, a development-only storage endpoint
+ * guarded by an HMAC signature, or the caller's own session identity. Do not add a route
+ * that reads or writes stored user data until the two items above exist.
  */
-export async function buildServer(): Promise<AppServer> {
+export async function buildServer(options: BuildServerOptions = {}): Promise<AppServer> {
   const config = getConfig();
   const logger = getLogger();
 
@@ -59,7 +67,9 @@ export async function buildServer(): Promise<AppServer> {
     return reply.code(status).send(body);
   });
 
+  await registerAuth(server, { keyResolver: options.authKeyResolver });
   await registerHealthRoutes(server);
+  await registerMeRoutes(server);
 
   if (!config.isProduction) {
     await registerDevStorageRoutes(server);

@@ -1,6 +1,6 @@
 # Scan My Mandir — Implementation Tasks
 
-**Version:** 1.13  
+**Version:** 1.14  
 **Updated:** 26 September 2026  
 **Stack:** Flutter/Dart, TypeScript/Fastify, PostgreSQL, private object storage  
 **Release target:** Android first; iOS later
@@ -31,6 +31,7 @@
 - [x] BUILD-06 — Phase 2 continued. P2-07 verified: journey back navigation, background/resume state, doubled system text scale, and semantics for icon-only controls, covered by `mobile/test/widget/accessibility_test.dart` (6 tests); 51 Flutter tests pass and `flutter analyze` is clean.
 - [x] BUILD-07 — The app was launched on a real Android target for the first time. The debug APK was installed on the Pixel_4 AVD (Android 14, API 34, x86_64) and the entire fixture journey was walked on the device in Hindi, with a clean `logcat`. "Flutter boots on Android" is no longer an assumption.
 - [x] BUILD-08 — Version control and CI are live. The initial commit `9de6df1` (193 files) was pushed to `github.com/geekyprem1/scanmandir`, and the push ran all three CI jobs green on the first attempt. `.gitattributes` pins LF so Windows checkouts cannot break `format:check`.
+- [x] BUILD-09 — Phase 3 started. P3-01 server half: Supabase JWT verification against the project's JWKS with an authenticated `GET /me`; the backend is now 71 tests (34 unit, 37 integration against real PostgreSQL) and `npm run check` is clean.
 
 ## Milestones and dependencies
 
@@ -119,7 +120,7 @@
 
 ## Phase 3 — Identity, ownership, and persistence
 
-- [ ] P3-01 — Integrate anonymous identity sessions and server token verification.
+- [ ] P3-01 — Integrate anonymous identity sessions and server token verification. *Partly done: the server half is built and tested. Supabase access tokens are verified locally against the project's JWKS — asymmetric algorithms only, with the symmetric algorithm refused outright — every failure is UNAUTHENTICATED in the documented error shape, and an authenticated `GET /me` returns the caller's id and guest status. Tests inject a local key set (`backend/test/support/tokens.ts`), so the suite needs no live project. Remaining: the app-side session (`supabase_flutter` plus the secure-storage choice still open at P0-02) and pointing configuration at the real project, which does not exist yet.*
 - [ ] P3-02 — Implement account upgrade/linking without losing guest history or merging unverified identities.
 - [ ] P3-03 — Add migrations for users, mandirs, scans, media, observations, confirmed items, context, reports, findings, sources, rule versions, jobs/outbox, quota ledger, entitlements, feedback, deletion requests, and audit events. *Jobs and outbox are done in `0001_job_infrastructure.sql`. Every domain table is still outstanding and deliberately waits on P0-06.*
 - [ ] P3-04 — Enforce user ownership for every scan, image, mandir, finding, and report endpoint.

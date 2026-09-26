@@ -20,6 +20,8 @@ export default defineConfig({
             NODE_ENV: 'test',
             // Never connected to by unit tests; config validation only requires it to exist.
             DATABASE_URL: 'postgres://unit-tests-do-not-connect',
+            // Verification in tests uses a local key set; this only satisfies config.
+            SUPABASE_URL: 'https://test-project.supabase.co',
           },
         },
       },
@@ -38,6 +40,9 @@ export default defineConfig({
             DATABASE_URL: TEST_DATABASE_URL,
             STORAGE_LOCAL_DIR: '.storage-test',
             STORAGE_URL_SECRET: 'integration_test_storage_secret_value',
+            // Matches the issuer and audience of the tokens signed in
+            // test/support/tokens.ts; verification uses a local key set, so no network.
+            SUPABASE_URL: 'https://test-project.supabase.co',
           },
         },
       },
