@@ -25,11 +25,14 @@ class _CompletedOnboarding extends OnboardingController {
 Future<FakeHttpTransport> pumpCapture(
   WidgetTester tester, {
   required FakeMediaPicker picker,
-  List<String> statuses = const <String>['completed'],
+  List<String> statuses = const <String>['awaiting_confirmation'],
+  List<Map<String, Object?>> observations = const <Map<String, Object?>>[],
   int maxPolls = 2,
   PollDelay? delay,
 }) async {
-  final ScanServer server = ScanServer(<String>[...statuses]);
+  final ScanServer server = ScanServer(<String>[
+    ...statuses,
+  ], observations: observations);
   final FakeHttpTransport transport = FakeHttpTransport(
     responder: server.respond,
   );
@@ -97,6 +100,11 @@ void main() {
     final FakeHttpTransport transport = await pumpCapture(
       tester,
       picker: picker,
+      // The analysis reaches the point where the user is asked to confirm.
+      statuses: <String>['awaiting_confirmation'],
+      observations: <Map<String, Object?>>[
+        scriptedObservation(id: 'obs_001', label: 'diya'),
+      ],
     );
 
     await tester.tap(find.text('Take a photo'));

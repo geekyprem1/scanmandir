@@ -101,6 +101,178 @@ class UploadTicket {
   final Map<String, String> requiredHeaders;
 }
 
+/// One confirmed item, as the report describes it.
+class ReportItemView {
+  const ReportItemView({
+    required this.id,
+    required this.label,
+    required this.representationType,
+    required this.verificationRequired,
+    required this.action,
+    required this.located,
+    this.memberLabels,
+  });
+
+  final String id;
+  final String label;
+  final String representationType;
+  final bool verificationRequired;
+
+  /// `confirmed` for something the model reported and the user accepted, `corrected` for a
+  /// label the user changed, `added` for something the model never saw.
+  final String action;
+  final bool located;
+  final List<String>? memberLabels;
+
+  static ReportItemView fromJson(Map<String, Object?> json) {
+    final Object? members = json['memberLabels'];
+    return ReportItemView(
+      id: '${json['id']}',
+      label: '${json['label']}',
+      representationType: '${json['representationType']}',
+      verificationRequired: json['verificationRequired'] == true,
+      action: '${json['action']}',
+      located: json['located'] == true,
+      memberLabels: members is List
+          ? members.map((Object? member) => '$member').toList()
+          : null,
+    );
+  }
+}
+
+/// Something the model noticed about the arrangement, kept only when it still refers to a
+/// confirmed item.
+class ReportFindingView {
+  const ReportFindingView({
+    required this.code,
+    required this.description,
+    required this.relatedItems,
+  });
+
+  final String code;
+  final String description;
+  final List<String> relatedItems;
+
+  static ReportFindingView fromJson(Map<String, Object?> json) {
+    final Object? related = json['relatedItems'];
+    return ReportFindingView(
+      code: '${json['code']}',
+      description: '${json['description']}',
+      relatedItems: related is List
+          ? related.map((Object? id) => '$id').toList()
+          : const <String>[],
+    );
+  }
+}
+
+/// The counts the report leads with.
+class ReportSummaryView {
+  const ReportSummaryView({
+    required this.items,
+    required this.itemsNeedingCheck,
+    required this.fromModel,
+    required this.corrected,
+    required this.added,
+    required this.locationsKnown,
+  });
+
+  final int items;
+  final int itemsNeedingCheck;
+  final int fromModel;
+  final int corrected;
+  final int added;
+  final int locationsKnown;
+
+  static ReportSummaryView fromJson(Map<String, Object?> json) {
+    int count(String key) => (json[key] as num?)?.toInt() ?? 0;
+    return ReportSummaryView(
+      items: count('items'),
+      itemsNeedingCheck: count('itemsNeedingCheck'),
+      fromModel: count('fromModel'),
+      corrected: count('corrected'),
+      added: count('added'),
+      locationsKnown: count('locationsKnown'),
+    );
+  }
+}
+
+class ScanReport {
+  const ScanReport({
+    required this.scanId,
+    required this.available,
+    required this.status,
+    this.inputRevision,
+    this.summary,
+    this.items = const <ReportItemView>[],
+    this.visualFindings = const <ReportFindingView>[],
+    this.guidanceStatus = 'not_available',
+    this.guidanceReason,
+    this.disclaimerNote,
+  });
+
+  final String scanId;
+
+  /// False while the report is still being generated; [status] says which stage the scan
+  /// is in, so a screen can explain rather than showing an error.
+  final bool available;
+  final String status;
+  final int? inputRevision;
+  final ReportSummaryView? summary;
+  final List<ReportItemView> items;
+  final List<ReportFindingView> visualFindings;
+
+  /// Always `not_available` until the reviewed rules are published (Phase 6).
+  final String guidanceStatus;
+  final String? guidanceReason;
+  final String? disclaimerNote;
+
+  bool get guidancePending => guidanceStatus != 'available';
+
+  static ScanReport fromJson(Map<String, Object?> json) {
+    final Object? document = json['report'];
+    final Map<String, Object?> report = document is Map<String, Object?>
+        ? document
+        : const <String, Object?>{};
+
+    final Object? items = report['items'];
+    final Object? findings = report['visualFindings'];
+    final Object? summary = report['summary'];
+    final Object? guidance = report['traditionalGuidance'];
+    final Object? disclaimer = report['disclaimer'];
+
+    return ScanReport(
+      scanId: '${json['scanId']}',
+      available: json['available'] == true,
+      status: '${json['status']}',
+      inputRevision: (report['inputRevision'] as num?)?.toInt(),
+      summary: summary is Map<String, Object?>
+          ? ReportSummaryView.fromJson(summary)
+          : null,
+      items: items is List
+          ? items
+                .whereType<Map<String, Object?>>()
+                .map(ReportItemView.fromJson)
+                .toList(growable: false)
+          : const <ReportItemView>[],
+      visualFindings: findings is List
+          ? findings
+                .whereType<Map<String, Object?>>()
+                .map(ReportFindingView.fromJson)
+                .toList(growable: false)
+          : const <ReportFindingView>[],
+      guidanceStatus: guidance is Map<String, Object?>
+          ? '${guidance['status']}'
+          : 'not_available',
+      guidanceReason: guidance is Map<String, Object?>
+          ? guidance['reason'] as String?
+          : null,
+      disclaimerNote: disclaimer is Map<String, Object?>
+          ? disclaimer['note'] as String?
+          : null,
+    );
+  }
+}
+
 /// Where an object sits in the image, in fractions of width and height.
 class BoundingBoxView {
   const BoundingBoxView({
@@ -405,6 +577,18 @@ class ScanApi {
       ),
     );
     return ScanObservations.fromJson(_requireBody(outcome));
+  }
+
+  /// The generated report. `available: false` means it is still being prepared, which is
+  /// the scan's own status rather than an error.
+  Future<ScanReport> readReport({required String scanId}) async {
+    final HttpOutcome outcome = await _authorized(
+      (String token) => _transport.get(
+        _resolve('/v1/scans/$scanId/report'),
+        headers: _headers(token),
+      ),
+    );
+    return ScanReport.fromJson(_requireBody(outcome));
   }
 
   /// Sends the user's confirmation, which becomes the input every later stage reads.

@@ -85,7 +85,14 @@ class ScanServer {
     this.createStatus = 201,
     List<Map<String, Object?>>? observations,
     this.confirmStatus = 201,
-  }) : observations = observations ?? const <Map<String, Object?>>[];
+    Map<String, Object?>? report,
+  }) : observations = observations ?? const <Map<String, Object?>>[],
+       report =
+           report ??
+           const <String, Object?>{
+             'available': false,
+             'status': 'generating_report',
+           };
 
   final List<String> statuses;
   final int createStatus;
@@ -94,16 +101,24 @@ class ScanServer {
   List<Map<String, Object?>> observations;
   final int confirmStatus;
 
+  /// What the report endpoint reports. Defaults to "not ready yet".
+  final Map<String, Object?> report;
+
   int creates = 0;
   int uploadUrls = 0;
   int uploads = 0;
   int completes = 0;
   int reads = 0;
   int observationReads = 0;
+  int reportReads = 0;
   int confirms = 0;
   Map<String, Object?>? lastConfirmation;
 
   Future<HttpOutcome?> respond(RecordedCall call) async {
+    if (call.method == 'GET' && call.path.endsWith('/report')) {
+      reportReads++;
+      return scriptedAnswer(200, report);
+    }
     if (call.method == 'POST' && call.path == '/v1/scans') {
       creates++;
       return scriptedAnswer(

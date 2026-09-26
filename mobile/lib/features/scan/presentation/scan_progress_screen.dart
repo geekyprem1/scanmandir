@@ -9,6 +9,7 @@ import '../../../core/model/failure.dart';
 import '../../../core/model/ui_state.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/scan_submission_controller.dart';
+import '../data/scan_api.dart';
 
 /// Analysis progress (PRD screen 7, stages from section 34).
 ///
@@ -38,9 +39,14 @@ class _ScanProgressScreenState extends ConsumerState<ScanProgressScreen> {
     final ScanSubmission? submission = ref
         .read(scanSubmissionControllerProvider)
         .valueOrNull;
-    if (submission?.stage == ScanStage.readyForConfirmation) {
-      context.go('/scan/detected');
-    }
+    if (submission?.stage != ScanStage.readyForConfirmation) return;
+    // A completed scan has a report to show; anything else is waiting for the user, and
+    // that happens on the confirmation screen.
+    context.go(
+      submission?.snapshot?.status == ScanStatus.completed
+          ? '/report'
+          : '/scan/detected',
+    );
   }
 
   @override
@@ -54,7 +60,7 @@ class _ScanProgressScreenState extends ConsumerState<ScanProgressScreen> {
       UiState<ScanSubmission> next,
     ) {
       if (next.valueOrNull?.stage == ScanStage.readyForConfirmation) {
-        context.go('/scan/detected');
+        _handOverIfReady();
       }
     });
 

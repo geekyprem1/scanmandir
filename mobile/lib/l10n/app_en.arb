@@ -226,6 +226,22 @@
   "viewReportAction": "View report",
 
   "reportTitle": "Report",
+  "reportItemsTitle": "What was confirmed",
+  "reportFindingsTitle": "What the photo showed",
+  "reportGuidanceTitle": "Traditional guidance",
+  "reportGuidancePending": "Not available yet. Guidance appears here once its sources have been reviewed and published.",
+  "reportOriginFromModel": "From the photo",
+  "reportOriginCorrected": "You corrected this",
+  "reportOriginAdded": "You added this",
+  "reportNotReadyTitle": "Your report is being prepared",
+  "reportNotReadyDetail": "It will appear here in a moment.",
+  "actionRefresh": "Refresh",
+  "reportLocationsKnown": "Positions known: {count}",
+  "@reportLocationsKnown": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "reportComplete": "Mandir scan complete",
   "reportItemsDetected": "Items detected: {count}",
   "@reportItemsDetected": {

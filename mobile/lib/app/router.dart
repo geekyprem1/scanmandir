@@ -40,10 +40,9 @@ GoRouter createRouter({
         return null;
       }
       final String path = state.uri.path;
-      // Scanning is real and stays reachable in every flavor. What is guarded is what still
-      // renders fixtures: the report screens, which the real report replaces.
-      final bool isFixtureRoute =
-          path == '/report' || path.startsWith('/report/');
+      // A report is real, so `/report` itself stays reachable; what is guarded is the
+      // finding and source detail screens, which still render development fixtures.
+      final bool isFixtureRoute = path.startsWith('/report/');
       return isFixtureRoute ? '/' : null;
     },
     routes: <RouteBase>[
