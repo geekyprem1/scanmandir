@@ -1,9 +1,23 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { JWTVerifyGetKey } from 'jose';
-import { createTokenVerifier, type AuthenticatedUser } from '../../shared/auth/verify.js';
+import { ensureUser } from '../../modules/identity/user_repository.js';
+import { createTokenVerifier } from '../../shared/auth/verify.js';
 import { getConfig } from '../../shared/config.js';
 import { AppError, ERROR_CODES } from '../../shared/errors.js';
 import type { AppServer } from '../types.js';
+
+/**
+ * The authenticated caller.
+ *
+ * `id` is the internal user id from `users`. Owned records reference it, and every
+ * ownership check compares against it — never against [identitySubject], which exists
+ * only so the token can be mapped (ARCHITECTURE.md section 9).
+ */
+export interface AuthenticatedUser {
+  id: string;
+  identitySubject: string;
+  isAnonymous: boolean;
+}
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -28,10 +42,13 @@ export interface AuthPluginOptions {
 /**
  * Registers session verification. Routes opt in per route:
  *
- *   server.get('/me', { preHandler: server.authenticate }, handler)
+ *   server.get('/v1/me', { preHandler: server.authenticate }, handler)
  *
  * A missing or malformed token is always UNAUTHENTICATED — never a silent anonymous
  * fallback, because every route that uses this guard is asking for a real identity.
+ *
+ * The guard also resolves (and on first sight provisions) the internal user, so a
+ * handler cannot accidentally treat the provider subject as an owner id.
  */
 export async function registerAuth(server: AppServer, options: AuthPluginOptions = {}): Promise<void> {
   const config = getConfig();
@@ -52,6 +69,13 @@ export async function registerAuth(server: AppServer, options: AuthPluginOptions
       throw new AppError(ERROR_CODES.UNAUTHENTICATED, 'A session token is required.');
     }
 
-    request.user = await verifyAccessToken(header.slice('Bearer '.length).trim());
+    const identity = await verifyAccessToken(header.slice('Bearer '.length).trim());
+    const user = await ensureUser(identity);
+
+    request.user = {
+      id: user.id,
+      identitySubject: user.identitySubject,
+      isAnonymous: user.isAnonymous,
+    };
   });
 }

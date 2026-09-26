@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { createTokenVerifier } from '../../src/shared/auth/verify.js';
+import { createTokenVerifier, type VerifiedIdentity } from '../../src/shared/auth/verify.js';
 import { ERROR_CODES } from '../../src/shared/errors.js';
 import { createTestSession, type TestSession } from '../support/tokens.js';
 
@@ -9,7 +9,7 @@ import { createTestSession, type TestSession } from '../support/tokens.js';
  */
 describe('Supabase access token verification', () => {
   let session: TestSession;
-  let verify: (token: string) => Promise<{ id: string; isAnonymous: boolean }>;
+  let verify: (token: string) => Promise<VerifiedIdentity>;
 
   beforeAll(async () => {
     session = await createTestSession();
@@ -24,19 +24,28 @@ describe('Supabase access token verification', () => {
   it('accepts a valid guest token and reports it as anonymous', async () => {
     const token = await session.sign({ isAnonymous: true });
 
-    await expect(verify(token)).resolves.toEqual({ id: 'user-1', isAnonymous: true });
+    await expect(verify(token)).resolves.toEqual({
+      subject: 'user-1',
+      isAnonymous: true,
+    });
   });
 
   it('reports a permanent account as not anonymous', async () => {
     const token = await session.sign({ sub: 'user-2', isAnonymous: false });
 
-    await expect(verify(token)).resolves.toEqual({ id: 'user-2', isAnonymous: false });
+    await expect(verify(token)).resolves.toEqual({
+      subject: 'user-2',
+      isAnonymous: false,
+    });
   });
 
   it('treats a token without the claim as a permanent account, not as a guest', async () => {
     const token = await session.sign({ sub: 'user-3' });
 
-    await expect(verify(token)).resolves.toEqual({ id: 'user-3', isAnonymous: false });
+    await expect(verify(token)).resolves.toEqual({
+      subject: 'user-3',
+      isAnonymous: false,
+    });
   });
 
   it('rejects an expired token', async () => {

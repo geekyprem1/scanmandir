@@ -5,6 +5,11 @@ export async function resetQueueTables(): Promise<void> {
   await getPool().query('TRUNCATE jobs, outbox_events RESTART IDENTITY');
 }
 
+/** Clears identity rows between tests. Never call this against a non-test database. */
+export async function resetIdentityTables(): Promise<void> {
+  await getPool().query('TRUNCATE users CASCADE');
+}
+
 export async function countRows(table: 'jobs' | 'outbox_events'): Promise<number> {
   const { rows } = await getPool().query<{ count: string }>(`SELECT count(*)::text AS count FROM ${table}`);
   return Number(rows[0]?.count ?? '0');

@@ -4,12 +4,14 @@ import { AppError, ERROR_CODES } from '../errors.js';
 /**
  * The identity carried by a verified Supabase access token.
  *
- * `id` is the Supabase user id (`sub`). It does not change when a guest upgrades to a
- * permanent account, which is why ownership rows can reference it for the life of the
- * account (docs/decisions.md D-15, TASKS P3-02).
+ * `subject` is the provider's user id (`sub`). It is a mapping key, not an identifier
+ * used by owned records: those reference the internal user id resolved from it
+ * (ARCHITECTURE.md section 9, `src/modules/identity/user_repository.ts`). The subject
+ * does not change when a guest upgrades to a permanent account, which is what lets the
+ * upgrade keep its history (docs/decisions.md D-15).
  */
-export interface AuthenticatedUser {
-  id: string;
+export interface VerifiedIdentity {
+  subject: string;
   /**
    * True while the user is still an anonymous guest. This is the token's
    * `is_anonymous` claim, not an inference from the absence of an email.
@@ -50,7 +52,7 @@ export function createTokenVerifier(options: TokenVerifierOptions) {
     });
   const issuer = options.issuer ?? new URL('/auth/v1', options.supabaseUrl).toString();
 
-  return async function verifyAccessToken(token: string): Promise<AuthenticatedUser> {
+  return async function verifyAccessToken(token: string): Promise<VerifiedIdentity> {
     let payload: Record<string, unknown>;
     try {
       const verified = await jwtVerify(token, jwks, {
@@ -70,6 +72,6 @@ export function createTokenVerifier(options: TokenVerifierOptions) {
       throw new AppError(ERROR_CODES.UNAUTHENTICATED, 'Invalid or expired session.');
     }
 
-    return { id: subject, isAnonymous: payload['is_anonymous'] === true };
+    return { subject, isAnonymous: payload['is_anonymous'] === true };
   };
 }

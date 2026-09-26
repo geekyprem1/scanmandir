@@ -4,9 +4,9 @@ import type { AppServer } from '../../src/api/types.js';
 import { createTestSession, type TestSession } from '../support/tokens.js';
 
 /**
- * The authenticated surface over real HTTP: a valid session reaches its own identity,
- * everything else is turned away in the documented error shape, and public routes stay
- * public.
+ * The guard's contract: a valid session is required, and every failure comes back as
+ * UNAUTHENTICATED in the documented error shape. Profile behaviour lives in
+ * identity.test.ts; this file is about being turned away.
  */
 describe('session-guarded routes', () => {
   let server: AppServer;
@@ -24,29 +24,11 @@ describe('session-guarded routes', () => {
   async function getMe(authorization?: string): Promise<{ statusCode: number; body: unknown }> {
     const response = await server.inject({
       method: 'GET',
-      url: '/me',
+      url: '/v1/me',
       ...(authorization ? { headers: { authorization } } : {}),
     });
     return { statusCode: response.statusCode, body: response.json() };
   }
-
-  it('returns the identity carried by a guest session', async () => {
-    const token = await session.sign({ sub: 'guest-1', isAnonymous: true });
-
-    await expect(getMe(`Bearer ${token}`)).resolves.toEqual({
-      statusCode: 200,
-      body: { id: 'guest-1', isAnonymous: true },
-    });
-  });
-
-  it('returns the identity carried by a permanent session', async () => {
-    const token = await session.sign({ sub: 'member-1', isAnonymous: false });
-
-    await expect(getMe(`Bearer ${token}`)).resolves.toEqual({
-      statusCode: 200,
-      body: { id: 'member-1', isAnonymous: false },
-    });
-  });
 
   it('turns away a request with no token, in the documented error shape', async () => {
     const { statusCode, body } = await getMe();
