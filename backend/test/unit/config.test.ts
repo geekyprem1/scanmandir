@@ -30,6 +30,13 @@ describe('configuration guards', () => {
     expect(() => getConfig()).toThrow();
   });
 
+  it('refuses the Supabase storage driver without a service key', () => {
+    process.env.STORAGE_DRIVER = 'supabase';
+    delete process.env.SUPABASE_SERVICE_KEY;
+    resetConfigCache();
+    expect(() => getConfig()).toThrow(/SUPABASE_SERVICE_KEY/);
+  });
+
   it('rejects a signing secret that is too short to be meaningful', () => {
     process.env.STORAGE_URL_SECRET = 'short';
     resetConfigCache();

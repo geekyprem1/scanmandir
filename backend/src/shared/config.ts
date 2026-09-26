@@ -16,17 +16,27 @@ const EnvSchema = z.object({
   DATABASE_POOL_MAX: z.coerce.number().int().positive().default(10),
 
   /**
-   * Local development object storage. Production uses private S3-compatible storage;
-   * that vendor is still an open decision (docs/decisions.md D-07), so the interface
-   * in src/shared/storage is what the rest of the code depends on.
+   * Object storage. `local` is the development filesystem driver; `supabase` uses the
+   * project's private Storage API (docs/decisions.md D-16) and needs a server-only
+   * secret key, because the backend writes, pins and deletes media on the user's behalf.
    */
-  STORAGE_DRIVER: z.enum(['local']).default('local'),
+  STORAGE_DRIVER: z.enum(['local', 'supabase']).default('local'),
   STORAGE_LOCAL_DIR: z.string().default('.storage'),
   /** Signs local storage URLs so the signed-transfer flow is exercised in development. */
   STORAGE_URL_SECRET: z.string().min(16).default('development_only_storage_secret_change_me'),
   STORAGE_URL_TTL_SECONDS: z.coerce.number().int().positive().default(300),
   /** Public base used when handing signed storage URLs to a client. */
   STORAGE_PUBLIC_BASE_URL: z.string().default('http://127.0.0.1:3000'),
+  /** Private bucket holding scan media when STORAGE_DRIVER=supabase. */
+  STORAGE_BUCKET: z
+    .string()
+    .regex(/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/, 'must be a valid bucket name')
+    .default('mandir-media'),
+  /**
+   * Server-only secret (`sb_secret_...` or the legacy service_role key). Never ships in
+   * the app: the publishable key cannot write to storage.
+   */
+  SUPABASE_SERVICE_KEY: z.string().min(1).optional(),
 
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(1000),
   WORKER_BATCH_SIZE: z.coerce.number().int().positive().default(5),
@@ -94,10 +104,16 @@ function load(): AppConfig {
     );
   }
   if (
+    env.STORAGE_DRIVER === 'local' &&
     env.NODE_ENV === 'production' &&
     env.STORAGE_URL_SECRET === 'development_only_storage_secret_change_me'
   ) {
     throw new Error('STORAGE_URL_SECRET still holds its development default.');
+  }
+  if (env.STORAGE_DRIVER === 'supabase' && !env.SUPABASE_SERVICE_KEY) {
+    throw new Error(
+      'STORAGE_DRIVER=supabase requires SUPABASE_SERVICE_KEY. The publishable key cannot write media.',
+    );
   }
 
   return {

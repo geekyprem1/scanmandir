@@ -1,12 +1,13 @@
 import { getConfig } from '../config.js';
 import { LocalObjectStorage } from './local.js';
+import { SupabaseObjectStorage } from './supabase.js';
 import type { ObjectStorage } from './types.js';
 
 let storage: ObjectStorage | null = null;
 
 /**
- * Returns the configured storage driver. Only `local` exists today; an S3-compatible
- * driver is added once the hosting decision is made (docs/decisions.md D-07).
+ * Returns the configured storage driver: the development filesystem driver, or Supabase
+ * Storage for a real deployment (docs/decisions.md D-16).
  */
 export function getObjectStorage(): ObjectStorage {
   if (storage) return storage;
@@ -15,6 +16,9 @@ export function getObjectStorage(): ObjectStorage {
   switch (config.STORAGE_DRIVER) {
     case 'local':
       storage = new LocalObjectStorage();
+      return storage;
+    case 'supabase':
+      storage = new SupabaseObjectStorage();
       return storage;
     default: {
       // Exhaustive: config validation already restricts the driver enum.

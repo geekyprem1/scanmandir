@@ -23,6 +23,9 @@ export default defineConfig({
             DATABASE_URL: 'postgres://unit-tests-do-not-connect',
             // Verification in tests uses a local key set; this only satisfies config.
             SUPABASE_URL: SUPABASE_TEST_URL,
+            // Storage stays on the local driver in tests; the value only satisfies the
+            // Supabase driver's constructor in its own unit tests.
+            SUPABASE_SERVICE_KEY: 'sb_secret_unit_tests',
           },
         },
       },
@@ -43,6 +46,8 @@ export default defineConfig({
             STORAGE_URL_SECRET: 'integration_test_storage_secret_value',
             // Must agree with the issuer and audience used in test/support/tokens.ts.
             SUPABASE_URL: SUPABASE_TEST_URL,
+            // Storage stays on the local driver here.
+            SUPABASE_SERVICE_KEY: 'sb_secret_integration_tests',
             // Small enough that an oversized upload is cheap to construct in a test.
             UPLOAD_MAX_BYTES: '65536',
           },
