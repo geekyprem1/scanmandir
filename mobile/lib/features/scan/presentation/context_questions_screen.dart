@@ -100,7 +100,11 @@ class _Confirmed extends StatelessWidget {
             ),
             const SizedBox(height: Insets.lg),
             FilledButton(
-              onPressed: () => context.go('/scan'),
+              // The report is where the answer is. The progress screen used to be the
+              // destination, and it had nothing left to poll once the confirmation was
+              // sent — the user landed on a finished stage list and had to find My
+              // Reports themselves (found on the emulator, TASKS BUILD-28).
+              onPressed: () => context.go('/report'),
               child: Text(l10n.actionContinue),
             ),
           ],

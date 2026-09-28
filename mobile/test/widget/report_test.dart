@@ -22,7 +22,8 @@ class _CompletedOnboarding extends OnboardingController {
 /// analysis finishing, and a server that answers with a report.
 Future<ScanServer> pumpToReport(
   WidgetTester tester, {
-  required Map<String, Object?> report,
+  Map<String, Object?>? report,
+  List<Map<String, Object?>>? reports,
   double textScale = 1,
 }) async {
   tester.platformDispatcher.textScaleFactorTestValue = textScale;
@@ -34,6 +35,7 @@ Future<ScanServer> pumpToReport(
       scriptedObservation(id: 'obs_001', label: 'ganesh'),
     ],
     report: report,
+    reports: reports,
   );
   final FakeHttpTransport transport = FakeHttpTransport(
     responder: server.respond,
@@ -200,5 +202,23 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.scrollUntilVisible(find.text('Traditional guidance'), 200);
     expect(find.text('Traditional guidance'), findsOneWidget);
+  });
+
+  testWidgets('keeps asking until the report is ready, then shows it', (
+    WidgetTester tester,
+  ) async {
+    // The worker needs a moment after the confirmation. The screen asks again rather than
+    // stopping on "being prepared" and leaving the user to press refresh.
+    final ScanServer server = await pumpToReport(
+      tester,
+      reports: <Map<String, Object?>>[
+        scriptedReport(available: false),
+        scriptedReport(items: <Map<String, Object?>>[scriptedReportItem()]),
+      ],
+    );
+
+    expect(server.reportReads, greaterThan(1));
+    expect(find.text('Mandir scan complete'), findsOneWidget);
+    expect(find.text('Ganesh'), findsWidgets);
   });
 }

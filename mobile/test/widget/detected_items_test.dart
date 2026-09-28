@@ -190,6 +190,13 @@ void main() {
     // And the screen says what happened rather than leaving the user on a dead form.
     expect(find.text('Confirmed'), findsOneWidget);
     expect(find.textContaining('report is being prepared'), findsOneWidget);
+
+    // Continue goes to the report, not back to a progress screen with nothing left to
+    // poll: the report is where the answer is, and the server has not finished the
+    // document in this script, so the report screen says so itself.
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    expect(find.text('Your report is being prepared'), findsOneWidget);
   });
 
   testWidgets(
