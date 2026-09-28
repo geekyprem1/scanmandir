@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scan_my_mandir/app/app.dart';
+import 'package:scan_my_mandir/core/app_preferences.dart';
 import 'package:scan_my_mandir/core/providers.dart';
 
 import '../support/fake_http_transport.dart';
@@ -27,6 +29,48 @@ Future<void> advance(WidgetTester tester, String label) async {
 }
 
 void main() {
+  testWidgets('completed onboarding and language survive a new app instance', (
+    WidgetTester tester,
+  ) async {
+    final MemoryAppPreferenceStore store = MemoryAppPreferenceStore();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          environmentProvider.overrideWithValue(testEnvironment()),
+          httpTransportProvider.overrideWithValue(FakeHttpTransport()),
+          appPreferenceStoreProvider.overrideWithValue(store),
+        ],
+        child: const ScanMyMandirApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('हिन्दी'));
+    await tester.pumpAndSettle();
+    await advance(tester, 'आगे');
+    await advance(tester, 'आगे');
+    await advance(tester, 'शुरू करें');
+
+    final AppPreferences restored = await store.load();
+    expect(restored.locale, const Locale('hi'));
+    expect(restored.onboardingCompleted, isTrue);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          environmentProvider.overrideWithValue(testEnvironment()),
+          httpTransportProvider.overrideWithValue(FakeHttpTransport()),
+          appPreferenceStoreProvider.overrideWithValue(store),
+          initialAppPreferencesProvider.overrideWithValue(restored),
+        ],
+        child: const ScanMyMandirApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('अपनी भाषा चुनें'), findsNothing);
+    expect(find.text('मंदिर स्कैन करें'), findsOneWidget);
+  });
+
   testWidgets('a first launch opens onboarding rather than home', (
     WidgetTester tester,
   ) async {

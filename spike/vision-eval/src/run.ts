@@ -7,6 +7,7 @@ import { VisionResponseSchema, contractViolations, type VisionResponse } from '.
 import { computeCost } from './cost.js';
 import { dryRunResult, DRY_RUN_MARKER } from './fixture.js';
 import { writeReports } from './report.js';
+import { PROMPT_VERSION, SCHEMA_VERSION } from './prompt.js';
 import type { EvalRecord } from './types.js';
 
 interface Options {
@@ -176,11 +177,20 @@ async function main(): Promise<void> {
 
     if (!options.force) {
       try {
-        await fs.access(target);
+        const cached = JSON.parse(await fs.readFile(target, 'utf8')) as Partial<EvalRecord>;
+        if (
+          cached.promptVersion !== PROMPT_VERSION ||
+          cached.schemaVersion !== SCHEMA_VERSION ||
+          cached.model !== config.model ||
+          cached.responseFormat !== config.responseFormat ||
+          (options.dryRun ? cached.source !== DRY_RUN_MARKER : cached.source === DRY_RUN_MARKER)
+        ) {
+          throw new Error(`Cached result for ${photo} has a different prompt, schema, model, format or run mode. Choose a new EVAL_RUN or use --force.`);
+        }
         console.log(`${position} ${photo} — cached, skipping`);
         continue;
-      } catch {
-        // not cached, continue
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
       }
     }
 
@@ -203,6 +213,9 @@ async function main(): Promise<void> {
       const record: EvalRecord = {
         photo,
         source: options.dryRun ? DRY_RUN_MARKER : 'openrouter',
+        promptVersion: PROMPT_VERSION,
+        schemaVersion: SCHEMA_VERSION,
+        responseFormat: config.responseFormat,
         model: config.model,
         upstreamModel: result.upstreamModel,
         provider: result.provider,

@@ -73,9 +73,9 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _select(WidgetRef ref, Locale? value) {
+  Future<void> _select(WidgetRef ref, Locale? value) async {
     if (value != null) {
-      ref.read(localeControllerProvider.notifier).select(value);
+      await ref.read(localeControllerProvider.notifier).select(value);
     }
   }
 }

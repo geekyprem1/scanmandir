@@ -1,15 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers.dart';
+
 /// Whether onboarding has been completed.
 ///
-/// In memory only. Persisting it needs the storage choice still open under P0-02 — the
-/// same decision that keeps the language preference (P2-02) in memory — so until that
-/// lands, every launch counts as a first launch.
+/// Loaded before routing and saved before the user leaves onboarding.
 class OnboardingController extends Notifier<bool> {
   @override
-  bool build() => false;
+  bool build() => ref.read(initialAppPreferencesProvider).onboardingCompleted;
 
-  void complete() => state = true;
+  Future<void> complete() async {
+    await ref.read(appPreferenceStoreProvider).completeOnboarding();
+    state = true;
+  }
 }
 
 final NotifierProvider<OnboardingController, bool> onboardingCompletedProvider =

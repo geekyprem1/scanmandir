@@ -14,8 +14,7 @@ import '../application/onboarding_controller.dart';
 /// disclaimer stays reachable from here as well as from Settings and every report
 /// (P2-08).
 ///
-/// Completion is held in memory until the storage decision at P0-02 lands, so the flow
-/// currently appears on every launch rather than only on the first one.
+/// Completion is persisted before navigating Home, so the next launch starts there.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -36,13 +35,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
-  void _advance() {
+  Future<void> _advance() async {
     if (_index < _pageCount - 1) {
-      _pages.nextPage(duration: _transition, curve: Curves.easeOutCubic);
+      await _pages.nextPage(duration: _transition, curve: Curves.easeOutCubic);
       return;
     }
 
-    ref.read(onboardingCompletedProvider.notifier).complete();
+    await ref.read(onboardingCompletedProvider.notifier).complete();
+    if (!mounted) return;
     context.go('/');
   }
 
@@ -154,9 +154,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  void _selectLanguage(Locale? value) {
+  Future<void> _selectLanguage(Locale? value) async {
     if (value != null) {
-      ref.read(localeControllerProvider.notifier).select(value);
+      await ref.read(localeControllerProvider.notifier).select(value);
     }
   }
 }

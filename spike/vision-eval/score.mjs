@@ -21,6 +21,10 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+if (process.env.EVAL_RUN) {
+  throw new Error('score.mjs contains human verdicts for the original v1 run only. Score a new run separately.');
+}
+
 const outDir = path.resolve('out');
 const rawDir = path.join(outDir, 'raw');
 

@@ -7,6 +7,11 @@
 
   "homeScanAction": "मंदिर स्कैन करें",
   "homeReportsAction": "मेरी रिपोर्ट",
+  "reportsEmptyTitle": "अभी कोई रिपोर्ट नहीं",
+  "reportsEmptyDetail": "पूरे हुए स्कैन यहाँ दिखाई देंगे।",
+  "reportsLoadMore": "और दिखाएँ",
+  "reportsItemCount": "{count} वस्तुएँ",
+  "@reportsItemCount": {"placeholders": {"count": {"type": "int"}}},
   "homeMandirProfileAction": "मंदिर प्रोफ़ाइल",
   "homeSettingsAction": "सेटिंग्स",
 

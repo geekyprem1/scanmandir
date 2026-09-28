@@ -34,6 +34,27 @@ const CreateScanSchema = z.object({ idempotencyKey: z.string().min(8).max(128) }
 const UploadUrlSchema = z.object({ contentType: z.string().min(3).max(64) }).strict();
 const UploadCompleteSchema = z.object({ stagingKey: z.string().min(1).max(256) }).strict();
 const ScanParamsSchema = z.object({ id: z.string().uuid() });
+const HistoryQuerySchema = z
+  .object({
+    cursor: z.string().max(256).optional(),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
+  })
+  .strict();
+
+function decodeHistoryCursor(value: string): { at: Date; id: string } {
+  try {
+    const parsed: unknown = JSON.parse(Buffer.from(value, 'base64url').toString('utf8'));
+    if (typeof parsed !== 'object' || parsed === null) throw new Error('invalid cursor');
+    const cursor = parsed as Record<string, unknown>;
+    const at = typeof cursor.at === 'string' ? new Date(cursor.at) : new Date(NaN);
+    if (Number.isNaN(at.getTime()) || !z.string().uuid().safeParse(cursor.id).success) {
+      throw new Error('invalid cursor');
+    }
+    return { at, id: cursor.id as string };
+  } catch {
+    throw new AppError(ERROR_CODES.VALIDATION_FAILED, 'Invalid history cursor.');
+  }
+}
 
 const ConfirmationBoxSchema = z
   .object({
@@ -147,6 +168,45 @@ export async function registerScanRoutes(server: AppServer): Promise<void> {
   const config = getConfig();
   const storage = getObjectStorage();
   const allowedContentTypes = config.UPLOAD_ALLOWED_CONTENT_TYPES;
+
+  /** Owner-only, newest-first report history. No photo is retained in this response. */
+  server.get('/v1/reports', { preHandler: server.authenticate }, async (request) => {
+    const caller = requireCaller(request);
+    const query = parseOrThrow(HistoryQuerySchema, request.query);
+    const cursor = query.cursor ? decodeHistoryCursor(query.cursor) : null;
+    const { rows } = await getPool().query<{
+      id: string;
+      created_at: Date;
+      generated_at: Date;
+      item_count: string | null;
+    }>(
+      `SELECT s.id, s.created_at, r.created_at AS generated_at,
+              r.body->'summary'->>'items' AS item_count
+         FROM scans s
+         JOIN reports r ON r.scan_id = s.id AND r.input_revision = s.input_revision
+        WHERE s.user_id = $1 AND s.deleted_at IS NULL AND s.status = 'completed'
+          AND ($2::timestamptz IS NULL OR (s.created_at, s.id) < ($2, $3::uuid))
+        ORDER BY s.created_at DESC, s.id DESC
+        LIMIT $4`,
+      [caller.id, cursor?.at ?? null, cursor?.id ?? null, query.limit + 1],
+    );
+    const page = rows.slice(0, query.limit);
+    const last = page.at(-1);
+    return {
+      items: page.map((row) => ({
+        scanId: row.id,
+        createdAt: row.created_at.toISOString(),
+        generatedAt: row.generated_at.toISOString(),
+        itemCount: Number(row.item_count ?? '0'),
+      })),
+      nextCursor:
+        rows.length > query.limit && last
+          ? Buffer.from(JSON.stringify({ at: last.created_at.toISOString(), id: last.id })).toString(
+              'base64url',
+            )
+          : null,
+    };
+  });
 
   /**
    * Creates a scan and reserves allowance before any paid provider work, in one

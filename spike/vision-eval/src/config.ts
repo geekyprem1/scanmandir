@@ -3,12 +3,17 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const runName = process.env.EVAL_RUN ?? '';
+if (runName && !/^[a-zA-Z0-9_-]+$/.test(runName)) {
+  throw new Error('EVAL_RUN must contain only letters, numbers, underscores or hyphens');
+}
+const out = path.resolve(here, '..', 'out', ...(runName ? [runName] : []));
 
 export const paths = {
   root: path.resolve(here, '..'),
   photos: path.resolve(here, '..', 'photos'),
-  out: path.resolve(here, '..', 'out'),
-  raw: path.resolve(here, '..', 'out', 'raw'),
+  out,
+  raw: path.join(out, 'raw'),
 };
 
 function num(name: string, fallback: number): number {
@@ -33,7 +38,7 @@ export const config = {
   model: process.env.MODEL ?? 'openai/gpt-6-luna',
 
   /** 'json_object' measures real-world malformed-output rate. 'json_schema' constrains the model instead. */
-  responseFormat: (process.env.RESPONSE_FORMAT ?? 'json_object') as 'json_object' | 'json_schema',
+  responseFormat: (process.env.RESPONSE_FORMAT ?? 'json_schema') as 'json_object' | 'json_schema',
 
   /**
    * Excludes providers that may retain or train on submitted data.

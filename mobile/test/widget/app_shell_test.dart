@@ -65,12 +65,12 @@ void main() {
     // unbuilt features are not: a production build must not lead to a sample report.
     expect(find.text('Scan My Mandir'), findsWidgets);
     expect(find.text('Journey preview (sample data)'), findsNothing);
-    expect(find.text('My Reports'), findsNothing);
+    expect(find.text('My Reports'), findsOneWidget);
     expect(find.text('Mandir Profile'), findsNothing);
     expect(find.text('Settings'), findsOneWidget);
   });
 
-  testWidgets('an unbuilt route is clearly labelled, never shown as a result', (
+  testWidgets('reports has an honest empty state before a scan', (
     WidgetTester tester,
   ) async {
     await pumpApp(tester);
@@ -78,13 +78,7 @@ void main() {
     await tester.tap(find.text('My Reports'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Not built yet'), findsOneWidget);
-    expect(
-      find.text(
-        'This screen is part of a later phase. Nothing here is a real scan result.',
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('No reports yet'), findsOneWidget);
   });
 
   testWidgets('switching language re-renders existing screens without a reload', (

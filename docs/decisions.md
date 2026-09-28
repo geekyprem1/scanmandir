@@ -81,6 +81,16 @@ What the constrained run showed:
 
 **Implemented.** The adapter (`backend/src/modules/vision/`) sends the schema-constrained request, applies the quality and relevance gate, normalizes what the evaluation showed needs normalizing, and stores observations immutably with the prompt and schema versions that produced them. Prompt v2 adds the home-versus-temple line the first evaluation showed was needed, and the first live run through the product pipeline produced fifteen observations with zero normalizations and zero contract violations. The measured numbers above belong to v1; v2 has not been re-measured on the full set yet, and that re-measurement is what would confirm the home-versus-temple improvement rather than merely suggesting it.
 
+### Production prompt v2 repeat, 27 September 2026
+
+The 20-photo set was re-run with the exact production v2 prompt after the evaluation
+harness was changed to import it from the backend. Schema validity remained 20/20;
+known non-home rejection improved from 11/15 to 14/15, while all four actual home
+photos stayed accepted. One temple photo still passed the home gate, the Lakshmi
+carving was still called Vishnu, and one response used `radha` outside the catalog.
+Fresh human scoring is required before comparing precision or recall. Full run
+details and limitations: `docs/vision-v2-evaluation.md`.
+
 ## D-05 — Estimated AI cost per scan
 
 **Status:** Estimate only — not measured

@@ -471,6 +471,45 @@ class ConfirmationResult {
   final String status;
 }
 
+class ReportHistoryEntry {
+  const ReportHistoryEntry({
+    required this.scanId,
+    required this.createdAt,
+    required this.itemCount,
+  });
+
+  final String scanId;
+  final DateTime createdAt;
+  final int itemCount;
+
+  static ReportHistoryEntry fromJson(Map<String, Object?> json) =>
+      ReportHistoryEntry(
+        scanId: '${json['scanId']}',
+        createdAt: DateTime.parse('${json['createdAt']}'),
+        itemCount: (json['itemCount'] as num?)?.toInt() ?? 0,
+      );
+}
+
+class ReportHistoryPage {
+  const ReportHistoryPage({required this.items, this.nextCursor});
+
+  final List<ReportHistoryEntry> items;
+  final String? nextCursor;
+
+  static ReportHistoryPage fromJson(Map<String, Object?> json) {
+    final Object? raw = json['items'];
+    return ReportHistoryPage(
+      items: raw is List
+          ? raw
+                .whereType<Map<String, Object?>>()
+                .map(ReportHistoryEntry.fromJson)
+                .toList()
+          : const <ReportHistoryEntry>[],
+      nextCursor: json['nextCursor'] as String?,
+    );
+  }
+}
+
 /// The scan endpoints of the backend (ARCHITECTURE.md section 10).
 ///
 /// Authorization is the session's bearer token, fetched per call and refreshed once on a
@@ -589,6 +628,18 @@ class ScanApi {
       ),
     );
     return ScanReport.fromJson(_requireBody(outcome));
+  }
+
+  Future<ReportHistoryPage> listReports({String? cursor}) async {
+    final Uri uri = _resolve('/v1/reports').replace(
+      queryParameters: cursor == null
+          ? null
+          : <String, String>{'cursor': cursor},
+    );
+    final HttpOutcome outcome = await _authorized(
+      (String token) => _transport.get(uri, headers: _headers(token)),
+    );
+    return ReportHistoryPage.fromJson(_requireBody(outcome));
   }
 
   /// Sends the user's confirmation, which becomes the input every later stage reads.

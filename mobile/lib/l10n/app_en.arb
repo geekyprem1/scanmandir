@@ -17,6 +17,11 @@
   },
 
   "homeReportsAction": "My Reports",
+  "reportsEmptyTitle": "No reports yet",
+  "reportsEmptyDetail": "Your completed scans will appear here.",
+  "reportsLoadMore": "Load more",
+  "reportsItemCount": "{count} items",
+  "@reportsItemCount": {"placeholders": {"count": {"type": "int"}}},
   "homeMandirProfileAction": "Mandir Profile",
   "homeSettingsAction": "Settings",
 

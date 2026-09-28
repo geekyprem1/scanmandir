@@ -6,26 +6,11 @@ Android first. iOS is planned, not scoped.
 
 ## Where the project actually stands
 
-Phase 1 foundation is built and verified. **No product feature exists yet.** There is no camera, no upload, no analysis, no report, no account and no billing.
+The Android core journey works: guest identity, photo capture or gallery import, private upload, vision analysis, user confirmation, and a stored report. My Reports lists completed scans for the owner and opens a saved report. Onboarding and language choice survive app restarts. The backend uses Supabase Auth, PostgreSQL and private Storage; the worker runs the analysis and report stages. See `TASKS.md` for verified build entries and pending tasks.
 
-| Area | State |
-|---|---|
-| Documents | PRD, architecture, review and task list at v1.3 |
-| Decision record | `docs/decisions.md`, 14 entries |
-| Backend foundation | Built. API, worker, migrations, durable queue, outbox, storage seam. 54 tests pass |
-| Flutter shell | Built. Theme, Hindi/English, routing, controller states, API client. 22 tests pass, debug and release APKs build |
-| Vision spike harness | Built and dry-run verified. **Waiting on photos and an API key** |
-| Label catalog | Blocked on the spike |
-| Knowledge base | Empty. No source has been reviewed |
-| Authentication | Does not exist |
+The report currently shows confirmed objects and observable arrangement findings. Traditional guidance is unavailable until references and rules have been reviewed by a person. The vision evaluation has only four genuine home-mandir photos; the launch labels and detection thresholds remain open. See `docs/vision-v2-evaluation.md`.
 
-## The one thing that matters next
-
-**Run the vision spike.** Whether a model can reliably identify what is in a real home mandir photo is the question the whole product rests on, and it is not answerable from a document. Cost is already known to be negligible — roughly ₹0.10 to ₹0.30 per scan on GPT-6 Luna, and about ₹2 even on the twenty-times-more-expensive Sol — so the open question is recognition quality, not affordability. See `docs/decisions.md` D-04 through D-06.
-
-The harness is ready. It needs 20 to 30 real photos and an OpenRouter key. `spike/vision-eval/README.md` has the photo spread that matters and explains why an easy set produces a falsely optimistic answer.
-
-Read `docs/decisions.md` D-08 before sending any photo: these are pictures of the inside of people's homes, routed to a third-party provider.
+Remaining engineering includes offline report cache, scan resume after process death, retake, deletion and retention, reviewed rules, production operations, and Android release validation. Compass and billing scope are still undecided.
 
 ## Quick start
 
@@ -78,9 +63,7 @@ cd ..\spike\vision-eval; npm run typecheck; npm run eval:dry
 
 ## Things worth knowing before changing anything
 
-**The backend has no authentication or authorization.** Do not add a route that reads or writes user data before P3-01, P3-04 and P3-07. Every route that exists today is a health probe or a development-only storage endpoint guarded by an HMAC signature and never registered in production.
-
-**No domain schema exists.** Users, scans, media, observations, rules, reports and quota arrive in P3-03. The one migration so far contains only the job queue and outbox.
+**Authentication and domain storage exist.** User-facing scan and report reads are authenticated and owner-scoped. New routes that read or write user data must preserve those checks.
 
 **A model may not author a religious rule.** Rules come from reviewed sources through a person. If no approved rule applies, the correct output is the visual observations plus an explicit statement that guidance is unavailable — not a plausible-sounding answer.
 

@@ -8,8 +8,12 @@ import { readdir, readFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const photosDir = path.resolve('photos');
-const rawDir = path.resolve('out', 'raw');
-const outDir = path.resolve('out');
+const runName = process.env.EVAL_RUN ?? '';
+if (runName && !/^[a-zA-Z0-9_-]+$/.test(runName)) {
+  throw new Error('EVAL_RUN must contain only letters, numbers, underscores or hyphens');
+}
+const outDir = path.resolve('out', ...(runName ? [runName] : []));
+const rawDir = path.join(outDir, 'raw');
 
 const TILE = 560;
 const TEXT = 150;

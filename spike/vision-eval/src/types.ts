@@ -7,6 +7,9 @@ import type { VisionResponse } from './schema.js';
 export interface EvalRecord {
   photo: string;
   source: string;
+  promptVersion: string;
+  schemaVersion: string;
+  responseFormat: string;
   model: string;
   upstreamModel: string | null;
   provider: string | null;

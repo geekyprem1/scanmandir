@@ -5,6 +5,7 @@ import { ALL_CANDIDATE_LABELS } from './schema.js';
 import { formatInr, formatUsd } from './cost.js';
 import { DRY_RUN_MARKER } from './fixture.js';
 import type { EvalRecord } from './types.js';
+import { PROMPT_VERSION, SCHEMA_VERSION } from './prompt.js';
 
 function csvCell(value: unknown): string {
   const text = value === null || value === undefined ? '' : String(value);
@@ -88,6 +89,7 @@ export async function writeReports(): Promise<void> {
   lines.push('# Vision spike results');
   lines.push('');
   lines.push(`Generated: ${new Date().toISOString()}`);
+  lines.push(`Prompt version: ${PROMPT_VERSION}; schema version: ${SCHEMA_VERSION}; response format: ${config.responseFormat}`);
   lines.push('');
 
   if (hasDryRun) {

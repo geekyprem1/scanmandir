@@ -22,7 +22,10 @@ import '../application/report_controller.dart';
 /// sources are Phase 6 — a guidance section filled from the model's imagination would be
 /// the one thing this product must never ship.
 class ReportOverviewScreen extends ConsumerStatefulWidget {
-  const ReportOverviewScreen({super.key});
+  const ReportOverviewScreen({this.scanId, super.key});
+
+  /// Supplied by history; null for the report reached from the active scan.
+  final String? scanId;
 
   @override
   ConsumerState<ReportOverviewScreen> createState() =>
@@ -37,10 +40,9 @@ class _ReportOverviewScreenState extends ConsumerState<ReportOverviewScreen> {
   }
 
   void _load() {
-    final String? scanId = ref
-        .read(scanSubmissionControllerProvider)
-        .valueOrNull
-        ?.scanId;
+    final String? scanId =
+        widget.scanId ??
+        ref.read(scanSubmissionControllerProvider).valueOrNull?.scanId;
     if (scanId != null) {
       ref.read(reportControllerProvider.notifier).load(scanId: scanId);
     }
@@ -64,7 +66,10 @@ class _ReportOverviewScreenState extends ConsumerState<ReportOverviewScreen> {
           UiTerminalError<ScanReport>(failure: final Failure failure) =>
             FailureView(failure: failure),
           _ =>
-            ref.read(scanSubmissionControllerProvider.notifier).hasStarted
+            (widget.scanId != null ||
+                    ref
+                        .read(scanSubmissionControllerProvider.notifier)
+                        .hasStarted)
                 ? LoadingView(label: l10n.reportTitle)
                 : EmptyView(
                     icon: Icons.description_outlined,

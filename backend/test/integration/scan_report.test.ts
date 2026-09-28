@@ -67,6 +67,46 @@ describe('scan report', () => {
     };
   }
 
+  it("lists only the owner's completed reports with a stable cursor", async () => {
+    const owner = await session.sign({ sub: 'history-owner', isAnonymous: true });
+    const other = await session.sign({ sub: 'history-other', isAnonymous: true });
+    const first = await confirmedScan(owner, 'history-owner-01', [confirmedObject()]);
+    await dispatchOutbox(5);
+    await tick(WORKER);
+    const second = await confirmedScan(owner, 'history-owner-02', [confirmedObject()]);
+    await dispatchOutbox(5);
+    await tick(WORKER);
+    await confirmedScan(other, 'history-other-01', [confirmedObject()]);
+    await dispatchOutbox(5);
+    await tick(WORKER);
+
+    const firstPage = await server.inject({
+      method: 'GET',
+      url: '/v1/reports?limit=1',
+      headers: auth(owner),
+    });
+    expect(firstPage.statusCode).toBe(200);
+    const page = firstPage.json<{ items: { scanId: string; itemCount: number }[]; nextCursor: string }>();
+    expect(page.items).toHaveLength(1);
+    expect(page.items[0]?.scanId).toBe(second);
+    expect(page.items[0]?.itemCount).toBe(1);
+
+    const next = await server.inject({
+      method: 'GET',
+      url: `/v1/reports?limit=1&cursor=${page.nextCursor}`,
+      headers: auth(owner),
+    });
+    expect(next.json<{ items: { scanId: string }[]; nextCursor: string | null }>().items).toEqual([
+      { scanId: first, createdAt: expect.any(String), generatedAt: expect.any(String), itemCount: 1 },
+    ]);
+    expect(next.json<{ nextCursor: string | null }>().nextCursor).toBeNull();
+    expect(
+      (await server.inject({ method: 'GET', url: '/v1/reports?cursor=bad', headers: auth(owner) }))
+        .statusCode,
+    ).toBe(400);
+    expect((await server.inject({ method: 'GET', url: '/v1/reports' })).statusCode).toBe(401);
+  });
+
   /** A scan that has been analysed, confirmed, and is waiting for its report. */
   async function confirmedScan(
     token: string,

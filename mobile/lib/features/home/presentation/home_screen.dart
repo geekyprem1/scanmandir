@@ -63,18 +63,18 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: Insets.sm),
               ActionCard(
-                label: l10n.homeReportsAction,
-                icon: Icons.description_outlined,
-                onTap: () => context.push('/reports'),
-              ),
-              const SizedBox(height: Insets.sm),
-              ActionCard(
                 label: l10n.homeMandirProfileAction,
                 icon: Icons.home_outlined,
                 onTap: () => context.push('/mandir'),
               ),
               const SizedBox(height: Insets.sm),
             ],
+            ActionCard(
+              label: l10n.homeReportsAction,
+              icon: Icons.description_outlined,
+              onTap: () => context.push('/reports'),
+            ),
+            const SizedBox(height: Insets.sm),
             ActionCard(
               label: l10n.homeSettingsAction,
               icon: Icons.settings_outlined,

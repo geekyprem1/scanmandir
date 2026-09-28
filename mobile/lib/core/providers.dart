@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'app_preferences.dart';
 import 'environment.dart';
 import 'network/api_client.dart';
 import 'network/http_transport.dart';
@@ -30,19 +31,28 @@ final Provider<ApiClient> apiClientProvider = Provider<ApiClient>((Ref ref) {
   );
 });
 
-/// Selected app language.
-///
-/// Held in memory for now. Persisting it across launches is P2-02; the getter and setter
-/// shape will not change when that lands.
+/// Selected app language, restored before the app's first frame.
+final Provider<AppPreferenceStore> appPreferenceStoreProvider =
+    Provider<AppPreferenceStore>((Ref ref) => MemoryAppPreferenceStore());
+
+final Provider<AppPreferences> initialAppPreferencesProvider =
+    Provider<AppPreferences>(
+      (Ref ref) => const AppPreferences(
+        locale: Locale('en'),
+        onboardingCompleted: false,
+      ),
+    );
+
 class LocaleController extends Notifier<Locale> {
   @override
-  Locale build() => const Locale('en');
+  Locale build() => ref.read(initialAppPreferencesProvider).locale;
 
-  void select(Locale locale) {
+  Future<void> select(Locale locale) async {
     if (!supportedLocales.contains(locale)) {
       throw ArgumentError.value(locale, 'locale', 'Not a supported locale');
     }
     state = locale;
+    await ref.read(appPreferenceStoreProvider).saveLocale(locale);
   }
 
   /// Hindi and English at launch. Further languages are LATER-02, and each needs a

@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app.dart';
+import 'core/app_preferences.dart';
 import 'core/auth/secure_session_storage.dart';
 import 'core/environment.dart';
 import 'core/platform/secure_storage.dart';
+import 'core/providers.dart';
 
 Future<void> main() async {
   // Session restore touches secure storage through platform channels, so the binding
@@ -15,6 +17,10 @@ Future<void> main() async {
   final Environment environment = Environment.resolve();
   final FlutterSecureCredentialStore credentials =
       FlutterSecureCredentialStore();
+  final SecureAppPreferenceStore preferences = SecureAppPreferenceStore(
+    credentials,
+  );
+  final AppPreferences initialPreferences = await preferences.load();
 
   await Supabase.initialize(
     url: environment.supabaseUrl.toString(),
@@ -27,5 +33,13 @@ Future<void> main() async {
     ),
   );
 
-  runApp(const ProviderScope(child: ScanMyMandirApp()));
+  runApp(
+    ProviderScope(
+      overrides: [
+        appPreferenceStoreProvider.overrideWithValue(preferences),
+        initialAppPreferencesProvider.overrideWithValue(initialPreferences),
+      ],
+      child: const ScanMyMandirApp(),
+    ),
+  );
 }

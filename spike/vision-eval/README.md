@@ -68,6 +68,12 @@ npm run eval -- --force
 npm run report      # regenerate reports from cached results
 ```
 
+The harness imports the current production prompt from `backend/src/modules/vision/prompt.ts`.
+Set `EVAL_RUN` to a new name for each prompt/model comparison; its raw responses and
+reports go under `out/<name>/`, leaving the original v1 run in `out/` untouched.
+Cached records are refused when their prompt version, schema version, model or response
+format differs from the current run. The `.env.example` uses `v2-luna`.
+
 ## The photo set in `photos/`
 
 `photos/SOURCES.md` records where every photo came from — Commons file, author, licence —
@@ -101,10 +107,15 @@ a human can see what is in it without opening twenty files. Rebuild it with
 
 ## Scoring
 
-`node make-verdict-sheet.mjs` renders the verdict sheets. `npm run score` applies the
+`node make-verdict-sheet.mjs` renders the verdict sheets for `EVAL_RUN`, when set.
+`npm run score` applies the
 verdicts held in `score.mjs` to those sheets and computes what a person would otherwise add
 up by hand: precision, recall and deity-label precision, written to
 `out/scoring-summary.md`.
+
+`score.mjs` contains human verdicts for the **original v1 run only** and refuses a named
+`EVAL_RUN`. A new run needs a fresh review of its verdict sheets and missed objects before
+any precision or recall number can be reported.
 
 The judgement is data in `score.mjs` rather than something the harness infers, because only
 a person who has looked at the photo can say whether a claim is true. The conventions are

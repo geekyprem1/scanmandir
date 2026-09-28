@@ -5,6 +5,7 @@ import '../core/designsystem/app_widgets.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/report/presentation/finding_detail_screen.dart';
+import '../features/report/presentation/report_history_screen.dart';
 import '../features/report/presentation/report_overview_screen.dart';
 import '../features/report/presentation/source_detail_screen.dart';
 import '../features/scan/presentation/capture_screen.dart';
@@ -88,11 +89,18 @@ GoRouter createRouter({
         ],
       ),
 
-      // Phase 8 onward. Placeholders, deliberately labelled.
       GoRoute(
         path: '/reports',
-        builder: (_, _) => const _Placeholder(routeLabel: 'My Reports'),
+        builder: (_, _) => const ReportHistoryScreen(),
+        routes: <RouteBase>[
+          GoRoute(
+            path: ':id',
+            builder: (_, GoRouterState state) =>
+                ReportOverviewScreen(scanId: state.pathParameters['id']!),
+          ),
+        ],
       ),
+      // Phase 8 onward. Placeholders, deliberately labelled.
       GoRoute(
         path: '/mandir',
         builder: (_, _) => const _Placeholder(routeLabel: 'Mandir Profile'),
